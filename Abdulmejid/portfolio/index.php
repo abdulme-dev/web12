@@ -13,9 +13,13 @@ $dbName = getenv('PORTFOLIO_DB_NAME') ?: 'abdulmejid_portfolio';
 $dbUser = getenv('PORTFOLIO_DB_USER');
 $dbPassword = getenv('PORTFOLIO_DB_PASSWORD');
 
-if ($dbUser === false || $dbPassword === false) {
+if ($dbPassword === false) {
+    $dbPassword = '';
+}
+
+if ($dbUser === false) {
     http_response_code(500);
-    exit('Set the MySQL username and password in the environment before starting the site.');
+    exit('Set the MySQL username in the environment before starting the site.');
 }
 
 if (!preg_match('/\A[A-Za-z0-9_]+\z/', $dbName) || filter_var($dbPort, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]) === false) {
@@ -136,6 +140,10 @@ if ($page === 'login' && $ownerAuthenticated) {
     header('Location: index.php?page=messages');
     exit;
 }
+if (in_array($page, ['login', 'messages'], true)) {
+    header('Cache-Control: no-store, private');
+}
+header('X-Content-Type-Options: nosniff');
 
 $flash = $_SESSION['flash'] ?? '';
 unset($_SESSION['flash']);
@@ -168,15 +176,15 @@ if ($page === 'messages') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #1b1c18;
-            --primary-dark: #30322b;
-            --primary-soft: #ebe8dd;
-            --secondary: #c9f16f;
-            --light: #f5f3ec;
+            --primary: #173554;
+            --primary-dark: #102945;
+            --primary-soft: #eaf1f8;
+            --secondary: #3bb7a5;
+            --light: #f3f7fb;
             --canvas: #ffffff;
-            --dark: #1b1c18;
-            --subtle: #73756a;
-            --border: #e2ded1;
+            --dark: #17304d;
+            --subtle: #65768a;
+            --border: #dbe4ee;
         }
 
         * {
@@ -221,9 +229,9 @@ if ($page === 'messages') {
         .site-navbar {
             min-height: 84px;
             padding: 0;
-            background: rgba(255, 253, 248, 0.96);
-            border-bottom: 1px solid rgba(226, 222, 209, 0.84);
-            box-shadow: 0 8px 30px rgba(27, 28, 24, 0.05);
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid rgba(219, 228, 238, 0.84);
+            box-shadow: 0 8px 30px rgba(23, 48, 77, 0.05);
             backdrop-filter: blur(16px);
         }
 
@@ -299,7 +307,7 @@ if ($page === 'messages') {
             place-items: center;
             background: var(--secondary);
             border-radius: 18px;
-            box-shadow: 0 8px 20px rgba(201, 241, 111, 0.34);
+            box-shadow: 0 8px 20px rgba(59, 183, 165, 0.34);
             color: var(--primary);
             font-size: 1.9rem;
             font-weight: 800;
@@ -326,7 +334,7 @@ if ($page === 'messages') {
             right: -180px;
             width: 680px;
             height: 680px;
-            background: radial-gradient(circle, rgba(201, 241, 111, 0.24), transparent 68%);
+            background: radial-gradient(circle, rgba(59, 183, 165, 0.24), transparent 68%);
             border-radius: 50%;
             content: "";
         }
@@ -337,7 +345,7 @@ if ($page === 'messages') {
             left: -70px;
             width: 170px;
             height: 170px;
-            background: radial-gradient(circle, rgba(27, 28, 24, 0.1), transparent 70%);
+            background: radial-gradient(circle, rgba(23, 48, 77, 0.1), transparent 70%);
             border-radius: 50%;
             content: "";
         }
@@ -395,7 +403,7 @@ if ($page === 'messages') {
         .hero-copy {
             max-width: 560px;
             margin-bottom: 30px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 1.02rem;
             line-height: 1.8;
         }
@@ -451,7 +459,7 @@ if ($page === 'messages') {
             display: flex;
             flex-wrap: wrap;
             gap: 10px 18px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.82rem;
             font-weight: 600;
         }
@@ -480,7 +488,7 @@ if ($page === 'messages') {
         .hero-orbit {
             position: absolute;
             inset: 8%;
-            border: 1px dashed rgba(27, 28, 24, 0.18);
+            border: 1px dashed rgba(23, 48, 77, 0.18);
             border-radius: 50%;
             animation: orbit 30s linear infinite;
         }
@@ -492,9 +500,9 @@ if ($page === 'messages') {
             width: 14px;
             height: 14px;
             background: var(--secondary);
-            border: 4px solid var(--surface);
+            border: 4px solid var(--canvas);
             border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(27, 28, 24, 0.12);
+            box-shadow: 0 4px 12px rgba(23, 48, 77, 0.12);
             content: "";
         }
 
@@ -519,10 +527,10 @@ if ($page === 'messages') {
             width: 88%;
             overflow: hidden;
             padding: 24px;
-            background: linear-gradient(145deg, #1e1f1a, #131410);
+            background: linear-gradient(145deg, #0d2038, #0b1c30);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 28px;
-            box-shadow: 0 30px 70px rgba(27, 28, 24, 0.24);
+            box-shadow: 0 30px 70px rgba(23, 48, 77, 0.24);
             color: #fff;
         }
 
@@ -541,7 +549,7 @@ if ($page === 'messages') {
             right: -80px;
             width: 240px;
             height: 240px;
-            background: radial-gradient(circle, rgba(201, 241, 111, 0.18), transparent 68%);
+            background: radial-gradient(circle, rgba(59, 183, 165, 0.18), transparent 68%);
             content: "";
             pointer-events: none;
         }
@@ -584,9 +592,9 @@ if ($page === 'messages') {
             margin: 2px auto 20px;
             place-items: center;
             background: var(--secondary);
-            border: 1px solid rgba(27, 28, 24, 0.06);
+            border: 1px solid rgba(23, 48, 77, 0.06);
             border-radius: 30px;
-            box-shadow: 0 0 0 12px rgba(201, 241, 111, 0.1);
+            box-shadow: 0 0 0 12px rgba(59, 183, 165, 0.1);
             color: var(--dark);
             font-size: 3rem;
         }
@@ -645,10 +653,10 @@ if ($page === 'messages') {
             align-items: center;
             gap: 8px;
             padding: 10px 13px;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 999px;
-            box-shadow: 0 12px 30px rgba(27, 28, 24, 0.1);
+            box-shadow: 0 12px 30px rgba(23, 48, 77, 0.1);
             font-size: 0.76rem;
             font-weight: 700;
         }
@@ -724,7 +732,7 @@ if ($page === 'messages') {
         }
 
         .body-copy {
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.98rem;
             line-height: 1.82;
         }
@@ -739,7 +747,7 @@ if ($page === 'messages') {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #3f4150;
+            color: #54677f;
             font-size: 0.9rem;
             font-weight: 600;
         }
@@ -751,17 +759,17 @@ if ($page === 'messages') {
 
         .student-card {
             overflow: hidden;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 28px;
-            box-shadow: 0 20px 55px rgba(27, 28, 24, 0.06);
+            box-shadow: 0 20px 55px rgba(23, 48, 77, 0.06);
         }
 
         .student-top {
             position: relative;
             overflow: hidden;
             padding: 32px;
-            background: linear-gradient(145deg, #1e1f1a, #2d2f27);
+            background: linear-gradient(145deg, #0d2038, #193959);
             color: #fff;
         }
 
@@ -771,7 +779,7 @@ if ($page === 'messages') {
             right: -85px;
             width: 240px;
             height: 240px;
-            border: 38px solid rgba(255, 231, 32, 0.14);
+            border: 38px solid rgba(59, 183, 165, 0.14);
             border-radius: 50%;
             content: "";
         }
@@ -876,7 +884,7 @@ if ($page === 'messages') {
         }
 
         .student-row span {
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.8rem;
         }
 
@@ -917,7 +925,7 @@ if ($page === 'messages') {
         .progress {
             height: 7px;
             overflow: hidden;
-            background: #e6e2d6;
+            background: #e7eef7;
             border-radius: 999px;
         }
 
@@ -938,15 +946,15 @@ if ($page === 'messages') {
         }
 
         .bar-mid {
-            background: #a8c96a;
+            background: #239c90;
         }
 
         .learning-card {
             padding: 28px;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 28px;
-            box-shadow: 0 18px 45px rgba(27, 28, 24, 0.05);
+            box-shadow: 0 18px 45px rgba(23, 48, 77, 0.05);
         }
 
         .focus-tabs {
@@ -963,7 +971,7 @@ if ($page === 'messages') {
             flex: 1;
             padding: 11px 10px;
             border-radius: 11px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.82rem;
             font-weight: 700;
         }
@@ -1009,7 +1017,7 @@ if ($page === 'messages') {
 
         .focus-row p {
             margin: 0;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.79rem;
             line-height: 1.65;
         }
@@ -1025,15 +1033,15 @@ if ($page === 'messages') {
         .project-card {
             height: 100%;
             overflow: hidden;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 26px;
-            box-shadow: 0 14px 38px rgba(27, 28, 24, 0.045);
+            box-shadow: 0 14px 38px rgba(23, 48, 77, 0.045);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .project-card:hover {
-            box-shadow: 0 22px 50px rgba(27, 28, 24, 0.09);
+            box-shadow: 0 22px 50px rgba(23, 48, 77, 0.09);
             transform: translateY(-5px);
         }
 
@@ -1052,11 +1060,11 @@ if ($page === 'messages') {
         }
 
         .project-media.edr {
-            background: radial-gradient(circle at 28% 22%, #3c3f32, transparent 52%), var(--dark);
+            background: radial-gradient(circle at 28% 22%, #25466b, transparent 52%), var(--dark);
         }
 
         .project-media.tool {
-            background: radial-gradient(circle at 82% 20%, rgba(201, 241, 111, 0.78), transparent 55%), #eae6da;
+            background: radial-gradient(circle at 82% 20%, rgba(59, 183, 165, 0.78), transparent 55%), #eaf1f8;
         }
 
         .project-label,
@@ -1109,9 +1117,9 @@ if ($page === 'messages') {
         }
 
         .project-media.tool .project-label {
-            background: rgba(27, 28, 24, 0.07);
-            border-color: rgba(27, 28, 24, 0.12);
-            color: rgba(27, 28, 24, 0.66);
+            background: rgba(23, 48, 77, 0.07);
+            border-color: rgba(23, 48, 77, 0.12);
+            color: rgba(23, 48, 77, 0.66);
         }
 
         .project-media.tool .project-status {
@@ -1120,11 +1128,11 @@ if ($page === 'messages') {
         }
 
         .project-media.tool .project-code {
-            color: rgba(27, 28, 24, 0.36);
+            color: rgba(23, 48, 77, 0.36);
         }
 
         .project-media.tool .project-code span {
-            background: rgba(27, 28, 24, 0.16);
+            background: rgba(23, 48, 77, 0.16);
         }
 
         .project-card:hover .project-icon {
@@ -1176,7 +1184,7 @@ if ($page === 'messages') {
 
         .project-body p {
             margin: 0 0 19px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.88rem;
             line-height: 1.75;
         }
@@ -1204,7 +1212,7 @@ if ($page === 'messages') {
             padding-top: 18px;
             margin-top: 20px;
             border-top: 1px solid var(--border);
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.74rem;
             font-weight: 600;
         }
@@ -1244,7 +1252,7 @@ if ($page === 'messages') {
         .contact-row span {
             display: block;
             margin-bottom: 2px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.72rem;
         }
 
@@ -1255,10 +1263,10 @@ if ($page === 'messages') {
 
         .form-card {
             padding: 30px;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 26px;
-            box-shadow: 0 20px 55px rgba(27, 28, 24, 0.06);
+            box-shadow: 0 20px 55px rgba(23, 48, 77, 0.06);
         }
 
         .form-card h3 {
@@ -1270,7 +1278,7 @@ if ($page === 'messages') {
 
         .form-card > p {
             margin: 0 0 22px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.82rem;
         }
 
@@ -1288,14 +1296,14 @@ if ($page === 'messages') {
         }
 
         .form-floating > label {
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.82rem;
         }
 
         .form-control:focus {
-            background: var(--surface);
+            background: var(--canvas);
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(27, 28, 24, 0.08);
+            box-shadow: 0 0 0 4px rgba(23, 48, 77, 0.08);
         }
 
         .btn-send {
@@ -1326,9 +1334,9 @@ if ($page === 'messages') {
         }
 
         .form-alert.success {
-            background: #f2f8e3;
-            border: 1px solid #d4e7ad;
-            color: #49630f;
+            background: #e7f6f2;
+            border: 1px solid #bce7dc;
+            color: #0f7566;
         }
 
         .site-footer {
@@ -1376,7 +1384,7 @@ if ($page === 'messages') {
             place-items: center;
             background: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 10px 24px rgba(27, 28, 24, 0.24);
+            box-shadow: 0 10px 24px rgba(23, 48, 77, 0.24);
             color: #fff;
             font-size: 1rem;
             opacity: 0;
@@ -1410,7 +1418,7 @@ if ($page === 'messages') {
             right: -100px;
             width: 430px;
             height: 430px;
-            background: radial-gradient(circle, rgba(201, 241, 111, 0.22), transparent 68%);
+            background: radial-gradient(circle, rgba(59, 183, 165, 0.22), transparent 68%);
             border-radius: 50%;
             content: "";
         }
@@ -1431,7 +1439,7 @@ if ($page === 'messages') {
         .inbox-subtitle {
             max-width: 480px;
             margin: 16px 0 0;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.94rem;
             line-height: 1.75;
         }
@@ -1445,16 +1453,16 @@ if ($page === 'messages') {
 
         .summary-card {
             padding: 20px;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 18px;
-            box-shadow: 0 10px 28px rgba(27, 28, 24, 0.04);
+            box-shadow: 0 10px 28px rgba(23, 48, 77, 0.04);
         }
 
         .summary-card span {
             display: block;
             margin-bottom: 7px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.67rem;
             font-weight: 800;
             letter-spacing: 0.1em;
@@ -1481,14 +1489,14 @@ if ($page === 'messages') {
 
         .message-card {
             padding: 23px;
-            background: var(--surface);
+            background: var(--canvas);
             border: 1px solid var(--border);
             border-radius: 19px;
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
         .message-card:hover {
-            border-color: #cdc8b8;
+            border-color: #bccbdb;
             transform: translateY(-2px);
         }
 
@@ -1529,7 +1537,7 @@ if ($page === 'messages') {
         .message-person a {
             display: block;
             overflow: hidden;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.77rem;
             text-overflow: ellipsis;
             text-decoration: none;
@@ -1542,22 +1550,22 @@ if ($page === 'messages') {
 
         .message-head time {
             flex: 0 0 auto;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.7rem;
             white-space: nowrap;
         }
 
         .message-body {
             margin: 0;
-            color: #4a4c5a;
+            color: #5a7088;
             font-size: 0.9rem;
             line-height: 1.75;
         }
 
         .empty-state {
             padding: 68px 25px;
-            background: var(--surface);
-            border: 1px dashed #c9c4b7;
+            background: var(--canvas);
+            border: 1px dashed #ced9e6;
             border-radius: 24px;
             text-align: center;
         }
@@ -1584,7 +1592,7 @@ if ($page === 'messages') {
         .empty-state p {
             max-width: 370px;
             margin: 0 auto 20px;
-            color: var(--muted);
+            color: var(--subtle);
             font-size: 0.86rem;
             line-height: 1.7;
         }
@@ -1721,7 +1729,7 @@ if ($page === 'messages') {
         }
     </style>
 </head>
-<body <?= $page === 'messages' ? '' : 'data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-root-margin="0px 0px -70%" data-bs-smooth-scroll="true" tabindex="0"' ?>>
+<body <?= in_array($page, ['login', 'messages'], true) ? '' : 'data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-root-margin="0px 0px -70%" data-bs-smooth-scroll="true" tabindex="0"' ?>>
     <nav class="navbar navbar-expand-lg fixed-top site-navbar" id="mainNav">
         <div class="container">
             <a class="mobile-brand d-lg-none" href="index.php">A<span>.</span></a>
@@ -2086,7 +2094,7 @@ if ($page === 'messages') {
                                             </div>
                                         </div>
                                         <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-3">
-                                            <button class="btn-send" type="submit">Send message <i class="bi bi-arrow-up-right"></i></button>
+                                            <button class="btn-send" type="submit">Send your hi <i class="bi bi-arrow-up-right"></i></button>
                                             <span class="small text-muted">Stored locally. No spam.</span>
                                         </div>
                                     </div>
@@ -2108,7 +2116,7 @@ if ($page === 'messages') {
                     <a href="index.php#projects">Projects</a>
                     <a href="index.php#contact">Contact</a>
                     <a href="index.php?page=login">Owner sign in</a>
-                    <span class="footer-credit">Template inspiration: <a href="https://freewebsitecreate.net" target="_blank" rel="noreferrer">Free Website Create</a></span>
+                    <span class="footer-credit">Template inspiration: <a href="https://github.com/dangi-tech/personal-portfolio-template2_Grade12" target="_blank" rel="noreferrer">Grade 12 Portfolio Template</a></span>
                 </div>
             </div>
         </div>
