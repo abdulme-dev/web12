@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $statement = $db->prepare('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)');
         $statement->execute([$name, $email, $message]);
-        $_SESSION['flash'] = 'Your hi has been sent. Thank you for stopping by.';
+        $_SESSION['flash'] = 'Your hi has been sent. Thank you for reaching out.';
         header('Location: index.php?sent=1#contact');
         exit;
     }
@@ -87,24 +87,23 @@ if ($page === 'messages') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Portfolio of Abdulmejid, a grade 12 student learning web development.">
+    <meta name="description" content="Abdulmejid is a grade 12 student at Kings School focused on cybersecurity, Python, and web development.">
     <title><?= $page === 'messages' ? 'Inbox' : 'Abdulmejid' ?> | Student Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
-            --paper: #f5f3ec;
-            --surface: #fffdf8;
-            --ink: #1b1c18;
-            --muted: #73756a;
-            --line: #e2ded1;
-            --lime: #c9f16f;
-            --lime-dark: #b3e24f;
-            --soft: #ebe8dd;
-            --radius: 24px;
+            --primary: #6244c5;
+            --primary-dark: #4c329e;
+            --primary-soft: #eee9ff;
+            --secondary: #ffe720;
+            --light: #fafafb;
+            --dark: #12141d;
+            --muted: #686a7c;
+            --border: #e7e4ef;
         }
 
         * {
@@ -113,673 +112,1109 @@ if ($page === 'messages') {
 
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 84px;
         }
 
         body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
             margin: 0;
-            background: var(--paper);
-            color: var(--ink);
-            font-family: "DM Sans", sans-serif;
+            padding-top: 84px;
+            overflow-x: hidden;
+            background: #fff;
+            color: var(--dark);
+            font-family: "Open Sans", sans-serif;
             -webkit-font-smoothing: antialiased;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        ::selection {
+            background: var(--secondary);
+            color: var(--dark);
         }
 
         a {
             color: inherit;
         }
 
-        ::selection {
-            background: var(--lime);
-            color: var(--ink);
+        section {
+            scroll-margin-top: 84px;
         }
 
-        .site-nav {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: rgba(245, 243, 236, 0.9);
-            border-bottom: 1px solid var(--line);
-            backdrop-filter: blur(14px);
+        .site-navbar {
+            min-height: 84px;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.96);
+            border-bottom: 1px solid rgba(231, 228, 239, 0.8);
+            box-shadow: 0 8px 30px rgba(18, 20, 29, 0.06);
+            backdrop-filter: blur(16px);
         }
 
-        .navbar {
-            padding: 18px 0;
+        .site-navbar .container {
+            min-height: 84px;
         }
 
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 11px;
-            color: var(--ink);
-            font-weight: 700;
-            letter-spacing: -0.03em;
+        .mobile-brand {
+            color: var(--dark);
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
             text-decoration: none;
         }
 
-        .brand-mark {
-            display: grid;
-            width: 36px;
-            height: 36px;
-            place-items: center;
-            background: var(--ink);
-            color: var(--lime);
-            border-radius: 11px;
-            font-family: "Instrument Serif", serif;
-            font-size: 23px;
-            line-height: 1;
-        }
-
-        .navbar-nav {
-            gap: 8px;
-        }
-
-        .nav-link {
-            color: var(--muted);
-            font-size: 0.92rem;
-            font-weight: 500;
-            padding: 8px 13px !important;
-            border-radius: 999px;
-            transition: color 0.2s ease, background 0.2s ease;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: var(--ink);
-            background: var(--soft);
-        }
-
-        .nav-inbox {
-            color: var(--ink);
-            border: 1px solid var(--line);
-            background: var(--surface);
+        .mobile-brand span {
+            color: var(--primary);
         }
 
         .navbar-toggler {
-            border: 1px solid var(--line);
-            border-radius: 10px;
             padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
             box-shadow: none !important;
         }
 
-        .hero {
-            padding: 84px 0 58px;
+        .navbar-collapse {
+            min-height: 84px;
         }
 
-        .eyebrow {
-            display: inline-flex;
+        .nav-side {
+            flex: 1;
             align-items: center;
-            gap: 9px;
-            margin-bottom: 24px;
-            color: var(--muted);
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
+            gap: 2px;
         }
 
-        .eyebrow::before {
-            width: 8px;
-            height: 8px;
-            background: var(--lime-dark);
+        .nav-end {
+            justify-content: flex-end;
+        }
+
+        .site-navbar .nav-link {
+            padding: 12px 14px !important;
+            border-radius: 999px;
+            color: var(--dark);
+            font-size: 0.93rem;
+            font-weight: 600;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        .site-navbar .nav-link:hover,
+        .site-navbar .nav-link.active {
+            color: var(--primary);
+        }
+
+        .site-navbar .inbox-link {
+            margin-left: 8px;
+            padding: 10px 17px !important;
+            background: var(--primary);
+            color: #fff !important;
+        }
+
+        .site-navbar .inbox-link:hover,
+        .site-navbar .inbox-link.active {
+            background: var(--primary-dark);
+        }
+
+        .brand-center {
+            display: grid;
+            width: 62px;
+            height: 62px;
+            flex: 0 0 auto;
+            place-items: center;
+            background: var(--secondary);
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(255, 231, 32, 0.32);
+            color: var(--primary);
+            font-size: 1.9rem;
+            font-weight: 800;
+            line-height: 1;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .brand-center:hover {
+            color: var(--primary);
+            transform: rotate(-4deg) scale(1.04);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 76px 0 64px;
+            background: var(--light);
+        }
+
+        .hero::before {
+            position: absolute;
+            top: -240px;
+            right: -180px;
+            width: 680px;
+            height: 680px;
+            background: radial-gradient(circle, rgba(98, 68, 197, 0.16), transparent 68%);
             border-radius: 50%;
             content: "";
         }
 
-        .hero-title {
-            max-width: 700px;
-            margin: 0 0 24px;
-            font-size: clamp(3rem, 6.2vw, 5.8rem);
-            font-weight: 600;
-            letter-spacing: -0.065em;
-            line-height: 0.96;
+        .hero::after {
+            position: absolute;
+            bottom: 40px;
+            left: -70px;
+            width: 170px;
+            height: 170px;
+            background: radial-gradient(circle, rgba(255, 231, 32, 0.44), transparent 70%);
+            border-radius: 50%;
+            content: "";
         }
 
-        .hero-title em {
-            font-family: "Instrument Serif", serif;
-            font-weight: 400;
-            letter-spacing: -0.02em;
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-greeting {
+            margin: 0 0 8px;
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .hero-name {
+            margin: 0 0 13px;
+            font-size: clamp(3.4rem, 7.2vw, 6.5rem);
+            font-weight: 800;
+            letter-spacing: -0.075em;
+            line-height: 0.94;
+        }
+
+        .typed-line {
+            min-height: 42px;
+            margin-bottom: 22px;
+            color: var(--primary);
+            font-size: clamp(1.15rem, 2.1vw, 1.55rem);
+            font-weight: 700;
+        }
+
+        .typed-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.15em;
+            margin-left: 4px;
+            background: var(--secondary);
+            vertical-align: -0.14em;
+            animation: blink 0.9s steps(2, start) infinite;
+        }
+
+        @keyframes blink {
+            0%,
+            45% {
+                opacity: 1;
+            }
+
+            46%,
+            100% {
+                opacity: 0;
+            }
         }
 
         .hero-copy {
             max-width: 560px;
             margin-bottom: 30px;
             color: var(--muted);
-            font-size: 1.08rem;
-            line-height: 1.75;
+            font-size: 1.02rem;
+            line-height: 1.8;
         }
 
         .hero-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
+            margin-bottom: 28px;
         }
 
-        .btn-ink,
-        .btn-quiet {
+        .btn-brand,
+        .btn-ghost,
+        .btn-send {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 9px;
-            padding: 13px 21px;
+            padding: 13px 23px;
             border-radius: 999px;
-            font-size: 0.93rem;
-            font-weight: 600;
+            font-size: 0.92rem;
+            font-weight: 700;
             text-decoration: none;
             transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
         }
 
-        .btn-ink {
-            background: var(--ink);
+        .btn-brand {
+            background: var(--primary);
+            border: 1px solid var(--primary);
             color: #fff;
-            border: 1px solid var(--ink);
         }
 
-        .btn-ink:hover {
-            background: #30322b;
+        .btn-brand:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
             color: #fff;
             transform: translateY(-2px);
         }
 
-        .btn-quiet {
-            background: transparent;
-            color: var(--ink);
-            border: 1px solid #cbc7bb;
+        .btn-ghost {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--dark);
         }
 
-        .btn-quiet:hover {
-            background: var(--surface);
-            border-color: var(--ink);
+        .btn-ghost:hover {
+            border-color: var(--primary);
+            color: var(--primary);
             transform: translateY(-2px);
         }
 
-        .hero-panel {
+        .hero-facts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 18px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .hero-facts span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .hero-facts i {
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .hero-art {
             position: relative;
-            min-height: 430px;
-            padding: 28px;
-            overflow: hidden;
-            background: var(--ink);
-            color: #fff;
-            border-radius: 30px;
-            box-shadow: 0 24px 60px rgba(27, 28, 24, 0.12);
+            display: grid;
+            width: 100%;
+            max-width: 480px;
+            margin-left: auto;
+            aspect-ratio: 1 / 1;
+            place-items: center;
         }
 
-        .hero-panel::before {
+        .hero-orbit {
             position: absolute;
-            top: -110px;
-            right: -90px;
-            width: 320px;
-            height: 320px;
-            background: radial-gradient(circle, rgba(201, 241, 111, 0.32), transparent 68%);
+            inset: 8%;
+            border: 1px dashed rgba(98, 68, 197, 0.34);
+            border-radius: 50%;
+            animation: orbit 30s linear infinite;
+        }
+
+        .hero-orbit::after {
+            position: absolute;
+            top: 16%;
+            right: 5%;
+            width: 14px;
+            height: 14px;
+            background: var(--secondary);
+            border: 4px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(18, 20, 29, 0.14);
             content: "";
         }
 
-        .hero-panel::after {
-            position: absolute;
-            right: -18px;
-            bottom: -70px;
-            color: rgba(255, 255, 255, 0.07);
-            content: "A";
-            font-family: "Instrument Serif", serif;
-            font-size: 290px;
-            line-height: 1;
+        @keyframes orbit {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        .panel-top,
-        .status-row,
-        .mini-info {
+        .hero-blob {
+            position: absolute;
+            inset: 13% 5% 4% 12%;
+            background: var(--primary);
+            border-radius: 45% 55% 60% 40% / 50% 45% 55% 50%;
+            opacity: 0.12;
+            transform: rotate(-10deg);
+        }
+
+        .hero-card {
             position: relative;
             z-index: 2;
+            width: 88%;
+            overflow: hidden;
+            padding: 24px;
+            background: linear-gradient(145deg, #1a1c27, #12141d);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            box-shadow: 0 30px 70px rgba(18, 20, 29, 0.28);
+            color: #fff;
         }
 
-        .panel-top {
+        .hero-card::before {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            background-size: 28px 28px;
+            content: "";
+            pointer-events: none;
+        }
+
+        .hero-card::after {
+            position: absolute;
+            top: -90px;
+            right: -80px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(98, 68, 197, 0.6), transparent 68%);
+            content: "";
+            pointer-events: none;
+        }
+
+        .hero-card-top {
+            position: relative;
+            z-index: 2;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 52px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-        }
-
-        .status-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .avatar {
-            display: grid;
-            width: 74px;
-            height: 74px;
-            flex: 0 0 auto;
-            place-items: center;
-            background: var(--lime);
-            color: var(--ink);
-            border-radius: 50%;
-            font-family: "Instrument Serif", serif;
-            font-size: 38px;
-        }
-
-        .status-row h2 {
-            margin: 0 0 5px;
-            font-size: 1.25rem;
-            font-weight: 600;
-            letter-spacing: -0.03em;
-        }
-
-        .status-row p {
-            margin: 0;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
-        }
-
-        .panel-rule {
-            position: relative;
-            z-index: 2;
-            height: 1px;
-            margin: 32px 0 24px;
-            background: rgba(255, 255, 255, 0.13);
-        }
-
-        .mini-info {
-            display: flex;
-            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 34px;
+            margin-bottom: 24px;
+            color: rgba(255, 255, 255, 0.48);
+            font-family: monospace;
+            font-size: 0.67rem;
         }
 
-        .mini-info span {
-            padding: 8px 12px;
-            color: rgba(255, 255, 255, 0.78);
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            border-radius: 999px;
-            font-size: 0.79rem;
+        .window-dots {
+            display: flex;
+            gap: 5px;
         }
 
-        .status-note {
+        .window-dots i {
+            width: 7px;
+            height: 7px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+        }
+
+        .window-dots i:first-child {
+            background: var(--secondary);
+        }
+
+        .security-mark {
             position: relative;
             z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            margin: 0;
-            color: rgba(255, 255, 255, 0.72);
-            font-size: 0.86rem;
-        }
-
-        .status-dot {
-            width: 9px;
-            height: 9px;
-            background: var(--lime);
-            border-radius: 50%;
-            box-shadow: 0 0 0 5px rgba(201, 241, 111, 0.12);
-        }
-
-        .stats {
-            padding: 28px 0;
-            border-top: 1px solid var(--line);
-            border-bottom: 1px solid var(--line);
-        }
-
-        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            width: 104px;
+            height: 104px;
+            margin: 2px auto 20px;
+            place-items: center;
+            background: linear-gradient(135deg, var(--primary), #8d72e8);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 30px;
+            box-shadow: 0 0 0 12px rgba(98, 68, 197, 0.12);
+            color: var(--secondary);
+            font-size: 3rem;
         }
 
-        .stat {
-            padding: 4px 28px;
-            border-right: 1px solid var(--line);
+        .security-label {
+            position: relative;
+            z-index: 2;
+            margin: 0 0 20px;
+            text-align: center;
         }
 
-        .stat:first-child {
-            padding-left: 0;
-        }
-
-        .stat:last-child {
-            border-right: 0;
-        }
-
-        .stat strong {
+        .security-label strong {
             display: block;
             margin-bottom: 4px;
-            font-family: "Instrument Serif", serif;
-            font-size: 2rem;
-            font-weight: 400;
-            line-height: 1;
+            font-size: 1.05rem;
+            font-weight: 700;
         }
 
-        .stat span {
-            color: var(--muted);
-            font-size: 0.83rem;
+        .security-label span {
+            color: rgba(255, 255, 255, 0.48);
+            font-size: 0.76rem;
+        }
+
+        .terminal-stack {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            gap: 8px;
+        }
+
+        .terminal-stack div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 11px;
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 9px;
+            font-family: monospace;
+            font-size: 0.7rem;
+        }
+
+        .terminal-stack span {
+            color: rgba(255, 255, 255, 0.42);
+        }
+
+        .terminal-stack strong {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .float-pill {
+            position: absolute;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 13px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            box-shadow: 0 12px 30px rgba(18, 20, 29, 0.12);
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .float-pill i {
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        .float-pill.one {
+            top: 3%;
+            right: -2%;
+        }
+
+        .float-pill.two {
+            bottom: 4%;
+            left: -2%;
         }
 
         .section {
             padding: 96px 0;
         }
 
-        .section-kicker {
-            display: flex;
+        .section-light {
+            background: var(--light);
+        }
+
+        .section-tag {
+            display: inline-flex;
             align-items: center;
-            gap: 11px;
-            margin-bottom: 22px;
-            color: var(--muted);
+            gap: 9px;
+            margin-bottom: 15px;
+            color: var(--primary);
             font-size: 0.76rem;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 0.14em;
             text-transform: uppercase;
         }
 
-        .section-kicker span {
-            display: grid;
-            width: 28px;
-            height: 28px;
-            place-items: center;
-            background: var(--soft);
-            border: 1px solid var(--line);
-            border-radius: 50%;
-            font-size: 0.7rem;
+        .section-tag::before {
+            width: 24px;
+            height: 3px;
+            background: var(--secondary);
+            border-radius: 3px;
+            content: "";
         }
 
         .section-title {
             margin: 0 0 20px;
-            font-size: clamp(2.2rem, 4vw, 3.6rem);
-            font-weight: 600;
-            letter-spacing: -0.055em;
-            line-height: 1.02;
+            font-size: clamp(2.35rem, 4.5vw, 3.7rem);
+            font-weight: 800;
+            letter-spacing: -0.06em;
+            line-height: 1.08;
         }
 
-        .section-title em {
-            font-family: "Instrument Serif", serif;
-            font-weight: 400;
-            letter-spacing: -0.02em;
+        .title-mark {
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
+        }
+
+        .title-mark::after {
+            position: absolute;
+            right: -3px;
+            bottom: 6px;
+            left: -3px;
+            z-index: -1;
+            height: 11px;
+            background: var(--secondary);
+            border-radius: 2px;
+            content: "";
+            transform: rotate(-1deg);
         }
 
         .body-copy {
             color: var(--muted);
+            font-size: 0.98rem;
+            line-height: 1.82;
+        }
+
+        .check-list {
+            display: grid;
+            gap: 13px;
+            margin: 25px 0 28px;
+        }
+
+        .check-list div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #3f4150;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .check-list i {
+            color: var(--primary);
             font-size: 1rem;
-            line-height: 1.8;
         }
 
-        .about-card {
-            padding: 28px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
+        .student-card {
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: 0 20px 55px rgba(18, 20, 29, 0.08);
         }
 
-        .about-list {
+        .student-top {
+            position: relative;
+            overflow: hidden;
+            padding: 32px;
+            background: linear-gradient(145deg, var(--primary), #5436ad);
+            color: #fff;
+        }
+
+        .student-top::after {
+            position: absolute;
+            top: -95px;
+            right: -85px;
+            width: 240px;
+            height: 240px;
+            border: 38px solid rgba(255, 231, 32, 0.14);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .student-top::before {
+            position: absolute;
+            right: 30px;
+            bottom: -34px;
+            color: rgba(255, 255, 255, 0.06);
+            content: "A";
+            font-size: 170px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .student-badge {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 11px;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .student-badge::before {
+            width: 7px;
+            height: 7px;
+            background: var(--secondary);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .grade-row {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: flex-end;
+            gap: 18px;
+        }
+
+        .grade-number {
+            color: var(--secondary);
+            font-size: 6rem;
+            font-weight: 800;
+            letter-spacing: -0.09em;
+            line-height: 0.8;
+        }
+
+        .grade-row h3 {
+            margin: 0 0 4px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .grade-row p {
             margin: 0;
-            padding: 0;
-            list-style: none;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 0.84rem;
         }
 
-        .about-list li {
+        .student-status {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 26px;
+            padding-top: 19px;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.78rem;
+        }
+
+        .student-status i {
+            color: var(--secondary);
+        }
+
+        .student-body {
+            padding: 10px 28px 18px;
+        }
+
+        .student-row {
             display: flex;
             align-items: baseline;
             justify-content: space-between;
+            gap: 24px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .student-row:last-child {
+            border-bottom: 0;
+        }
+
+        .student-row span {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .student-row strong {
+            text-align: right;
+            font-size: 0.86rem;
+            font-weight: 700;
+        }
+
+        .skill-item {
+            margin-bottom: 24px;
+        }
+
+        .skill-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .skill-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 20px;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--line);
+            margin-bottom: 8px;
         }
 
-        .about-list li:first-child {
-            padding-top: 0;
+        .skill-head h6 {
+            margin: 0;
+            font-size: 0.86rem;
+            font-weight: 700;
         }
 
-        .about-list li:last-child {
+        .skill-head span {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .progress {
+            height: 7px;
+            overflow: hidden;
+            background: #eae7f3;
+            border-radius: 999px;
+        }
+
+        .progress-bar {
+            border-radius: 999px;
+        }
+
+        .bar-primary {
+            background: var(--primary);
+        }
+
+        .bar-yellow {
+            background: var(--secondary);
+        }
+
+        .bar-dark {
+            background: var(--dark);
+        }
+
+        .bar-mid {
+            background: #9b86e2;
+        }
+
+        .learning-card {
+            padding: 28px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: 0 18px 45px rgba(18, 20, 29, 0.06);
+        }
+
+        .focus-tabs {
+            display: flex;
+            gap: 5px;
+            padding: 5px;
+            margin-bottom: 24px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+        }
+
+        .focus-tabs .nav-link {
+            flex: 1;
+            padding: 11px 10px;
+            border-radius: 11px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .focus-tabs .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .focus-tabs .nav-link.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .focus-row {
+            display: flex;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .focus-row:last-child {
             padding-bottom: 0;
             border-bottom: 0;
         }
 
-        .about-list span {
-            color: var(--muted);
-            font-size: 0.84rem;
-        }
-
-        .about-list strong {
-            text-align: right;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .skill-card {
-            height: 100%;
-            padding: 26px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            transition: transform 0.25s ease, border-color 0.25s ease;
-        }
-
-        .skill-card:hover {
-            border-color: #c7c2b5;
-            transform: translateY(-4px);
-        }
-
-        .skill-icon {
+        .focus-icon {
             display: grid;
-            width: 44px;
-            height: 44px;
-            margin-bottom: 32px;
+            width: 42px;
+            height: 42px;
+            flex: 0 0 auto;
             place-items: center;
-            background: var(--lime);
-            border-radius: 13px;
-            font-size: 1.15rem;
-        }
-
-        .skill-card h3 {
-            margin: 0 0 10px;
+            background: var(--primary-soft);
+            border-radius: 12px;
+            color: var(--primary);
             font-size: 1.05rem;
-            font-weight: 600;
-            letter-spacing: -0.025em;
         }
 
-        .skill-card p {
+        .focus-row h6 {
+            margin: 1px 0 3px;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .focus-row p {
             margin: 0;
             color: var(--muted);
-            font-size: 0.9rem;
-            line-height: 1.7;
+            font-size: 0.79rem;
+            line-height: 1.65;
+        }
+
+        .focus-row small {
+            display: block;
+            margin-top: 5px;
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .project-card {
+            height: 100%;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            box-shadow: 0 14px 38px rgba(18, 20, 29, 0.055);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .project-card:hover {
+            box-shadow: 0 22px 50px rgba(18, 20, 29, 0.11);
+            transform: translateY(-5px);
+        }
+
+        .project-media {
+            position: relative;
+            height: 275px;
+            overflow: hidden;
+        }
+
+        .project-media::before {
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+            background-size: 32px 32px;
+            content: "";
+        }
+
+        .project-media.edr {
+            background: radial-gradient(circle at 28% 22%, #49328f, transparent 52%), var(--dark);
+        }
+
+        .project-media.tool {
+            background: radial-gradient(circle at 82% 20%, #8f77df, transparent 52%), linear-gradient(145deg, var(--primary), #4a3196);
+        }
+
+        .project-label,
+        .project-status {
+            position: absolute;
+            z-index: 2;
+            top: 22px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+        }
+
+        .project-label {
+            left: 22px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: rgba(255, 255, 255, 0.74);
+        }
+
+        .project-status {
+            right: 22px;
+            background: var(--secondary);
+            color: var(--dark);
+        }
+
+        .project-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 2;
+            display: grid;
+            width: 108px;
+            height: 108px;
+            place-items: center;
+            background: var(--secondary);
+            border-radius: 30px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+            color: var(--dark);
+            font-size: 3rem;
+            transform: translate(-50%, -50%);
+            transition: transform 0.3s ease;
+        }
+
+        .project-media.tool .project-icon {
+            background: #fff;
+            color: var(--primary);
+        }
+
+        .project-card:hover .project-icon {
+            transform: translate(-50%, -50%) rotate(-4deg) scale(1.06);
+        }
+
+        .project-code {
+            position: absolute;
+            right: 22px;
+            bottom: 18px;
+            left: 22px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: rgba(255, 255, 255, 0.38);
+            font-family: monospace;
+            font-size: 0.68rem;
+        }
+
+        .project-code span {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.16);
+            border-radius: 999px;
+        }
+
+        .project-code span:nth-child(1) {
+            width: 42px;
+        }
+
+        .project-code span:nth-child(2) {
+            width: 26px;
+        }
+
+        .project-code span:nth-child(3) {
+            width: 58px;
+        }
+
+        .project-body {
+            padding: 25px;
+        }
+
+        .project-body h3 {
+            margin: 0 0 9px;
+            font-size: 1.42rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+        }
+
+        .project-body p {
+            margin: 0 0 19px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.75;
         }
 
         .tag-row {
             display: flex;
             flex-wrap: wrap;
             gap: 7px;
-            margin-top: 18px;
         }
 
         .tag {
             padding: 5px 10px;
-            background: var(--paper);
-            border: 1px solid var(--line);
+            background: var(--primary-soft);
             border-radius: 999px;
-            color: var(--muted);
-            font-size: 0.72rem;
-            font-weight: 500;
+            color: var(--primary);
+            font-size: 0.69rem;
+            font-weight: 700;
         }
 
-        .project-card {
-            display: flex;
-            height: 100%;
-            flex-direction: column;
-            padding: 26px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
-        }
-
-        .project-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 16px 35px rgba(27, 28, 24, 0.07);
-        }
-
-        .project-top {
+        .project-footer {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 42px;
-        }
-
-        .project-number {
+            gap: 12px;
+            padding-top: 18px;
+            margin-top: 20px;
+            border-top: 1px solid var(--border);
             color: var(--muted);
-            font-family: "DM Sans", sans-serif;
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-        }
-
-        .project-arrow {
-            display: grid;
-            width: 32px;
-            height: 32px;
-            place-items: center;
-            background: var(--soft);
-            border-radius: 50%;
-            font-size: 0.85rem;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-
-        .project-card:hover .project-arrow {
-            background: var(--lime);
-            transform: rotate(-35deg);
-        }
-
-        .project-card h3 {
-            margin: 0 0 10px;
-            font-size: 1.25rem;
+            font-size: 0.74rem;
             font-weight: 600;
-            letter-spacing: -0.035em;
         }
 
-        .project-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.9rem;
-            line-height: 1.7;
+        .project-footer i {
+            color: var(--primary);
         }
 
-        .project-card .tag-row {
-            margin-top: auto;
-            padding-top: 22px;
+        .contact-info {
+            margin-top: 30px;
         }
 
-        .contact-wrap {
-            padding: 46px;
-            background: var(--ink);
-            color: #fff;
-            border-radius: 32px;
-        }
-
-        .contact-wrap .section-kicker {
-            color: rgba(255, 255, 255, 0.55);
-        }
-
-        .contact-wrap .section-kicker span {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .contact-wrap .section-title {
-            margin-bottom: 18px;
-        }
-
-        .contact-copy {
-            max-width: 420px;
-            margin: 0;
-            color: rgba(255, 255, 255, 0.62);
-            font-size: 0.96rem;
-            line-height: 1.75;
-        }
-
-        .contact-links {
+        .contact-row {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 34px;
-        }
-
-        .contact-links a {
-            display: inline-flex;
             align-items: center;
-            gap: 9px;
-            width: fit-content;
-            color: rgba(255, 255, 255, 0.76);
-            font-size: 0.86rem;
-            text-decoration: none;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .contact-links a:hover {
-            color: var(--lime);
+        .contact-row:last-child {
+            border-bottom: 0;
         }
 
-        .form-panel {
-            padding: 26px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 22px;
+        .contact-icon {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 auto;
+            place-items: center;
+            background: var(--primary-soft);
+            border-radius: 13px;
+            color: var(--primary);
+            font-size: 1.05rem;
         }
 
-        .form-label {
-            margin-bottom: 8px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
+        .contact-row span {
+            display: block;
+            margin-bottom: 2px;
+            color: var(--muted);
+            font-size: 0.72rem;
         }
 
-        .form-control {
-            padding: 12px 14px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 0.92rem;
-            box-shadow: none;
+        .contact-row strong {
+            font-size: 0.88rem;
+            font-weight: 700;
         }
 
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+        .form-card {
+            padding: 30px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            box-shadow: 0 20px 55px rgba(18, 20, 29, 0.08);
+        }
+
+        .form-card h3 {
+            margin: 0 0 5px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .form-card > p {
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .form-floating > .form-control {
+            min-height: 58px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            color: var(--dark);
+            font-size: 0.88rem;
+        }
+
+        .form-floating > textarea.form-control {
+            min-height: 122px;
+        }
+
+        .form-floating > label {
+            color: var(--muted);
+            font-size: 0.82rem;
         }
 
         .form-control:focus {
-            background: rgba(255, 255, 255, 0.09);
-            border-color: var(--lime);
-            color: #fff;
-            box-shadow: 0 0 0 3px rgba(201, 241, 111, 0.12);
-        }
-
-        textarea.form-control {
-            min-height: 112px;
-            resize: vertical;
-        }
-
-        .form-note {
-            margin: 14px 0 0;
-            color: rgba(255, 255, 255, 0.38);
-            font-size: 0.74rem;
-            line-height: 1.6;
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(98, 68, 197, 0.11);
         }
 
         .btn-send {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 9px;
-            padding: 12px 20px;
-            background: var(--lime);
-            border: 1px solid var(--lime);
-            border-radius: 999px;
-            color: var(--ink);
-            font-size: 0.9rem;
-            font-weight: 700;
-            transition: background 0.2s ease, transform 0.2s ease;
+            background: var(--primary);
+            border: 1px solid var(--primary);
+            color: #fff;
         }
 
         .btn-send:hover {
-            background: var(--lime-dark);
-            border-color: var(--lime-dark);
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: #fff;
             transform: translateY(-2px);
         }
 
@@ -787,123 +1222,180 @@ if ($page === 'messages') {
             margin-bottom: 18px;
             padding: 12px 14px;
             border-radius: 11px;
-            font-size: 0.82rem;
+            font-size: 0.79rem;
             line-height: 1.5;
         }
 
         .form-alert.error {
-            background: rgba(255, 133, 133, 0.12);
-            border: 1px solid rgba(255, 133, 133, 0.24);
-            color: #ffc1c1;
+            background: #fff0f0;
+            border: 1px solid #f1c8c8;
+            color: #a83232;
         }
 
         .form-alert.success {
-            background: rgba(201, 241, 111, 0.12);
-            border: 1px solid rgba(201, 241, 111, 0.24);
-            color: var(--lime);
+            background: #fffbe0;
+            border: 1px solid #f1e58a;
+            color: #685c00;
         }
 
         .site-footer {
-            padding: 28px 0 36px;
+            padding: 27px 0;
+            background: var(--dark);
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .footer-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
-            color: var(--muted);
-            font-size: 0.8rem;
+            gap: 18px;
+            font-size: 0.78rem;
+        }
+
+        .footer-row a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .footer-row a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-credit a {
+            color: var(--secondary) !important;
+            text-decoration: underline !important;
         }
 
         .footer-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 18px;
+            gap: 17px;
         }
 
-        .footer-links a {
-            color: var(--muted);
+        .back-top {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 60;
+            display: grid;
+            width: 44px;
+            height: 44px;
+            place-items: center;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 10px 24px rgba(98, 68, 197, 0.32);
+            color: #fff;
+            font-size: 1rem;
+            opacity: 0;
+            pointer-events: none;
             text-decoration: none;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
 
-        .footer-links a:hover {
-            color: var(--ink);
+        .back-top.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-top:hover {
+            background: var(--primary-dark);
+            color: #fff;
         }
 
         .inbox-hero {
-            padding: 64px 0 34px;
+            position: relative;
+            overflow: hidden;
+            padding: 72px 0 38px;
+            background: var(--light);
+        }
+
+        .inbox-hero::before {
+            position: absolute;
+            top: -160px;
+            right: -100px;
+            width: 430px;
+            height: 430px;
+            background: radial-gradient(circle, rgba(98, 68, 197, 0.15), transparent 68%);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .inbox-hero .container {
+            position: relative;
+            z-index: 2;
         }
 
         .inbox-title {
             margin: 0;
-            font-size: clamp(2.8rem, 6vw, 5rem);
-            font-weight: 600;
-            letter-spacing: -0.065em;
+            font-size: clamp(2.9rem, 6vw, 4.7rem);
+            font-weight: 800;
+            letter-spacing: -0.07em;
             line-height: 1;
-        }
-
-        .inbox-title em {
-            font-family: "Instrument Serif", serif;
-            font-weight: 400;
-            letter-spacing: -0.02em;
         }
 
         .inbox-subtitle {
             max-width: 480px;
-            margin: 18px 0 0;
+            margin: 16px 0 0;
             color: var(--muted);
-            font-size: 0.98rem;
+            font-size: 0.94rem;
             line-height: 1.75;
         }
 
         .inbox-summary {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 28px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
         .summary-card {
-            padding: 22px;
-            background: var(--surface);
-            border: 1px solid var(--line);
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--border);
             border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(18, 20, 29, 0.05);
         }
 
         .summary-card span {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
             color: var(--muted);
-            font-size: 0.73rem;
-            font-weight: 700;
+            font-size: 0.67rem;
+            font-weight: 800;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
         .summary-card strong {
-            font-family: "Instrument Serif", serif;
-            font-size: 1.7rem;
-            font-weight: 400;
-            line-height: 1.05;
+            font-size: 1.32rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+
+        .summary-card strong.count {
+            color: var(--primary);
+            font-size: 2rem;
         }
 
         .message-list {
             display: grid;
-            gap: 14px;
-            padding-bottom: 80px;
+            gap: 13px;
+            padding-bottom: 75px;
         }
 
         .message-card {
-            padding: 24px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 20px;
+            padding: 23px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 19px;
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
         .message-card:hover {
-            border-color: #c8c3b6;
+            border-color: #cfc5ef;
             transform: translateY(-2px);
         }
 
@@ -912,173 +1404,212 @@ if ($page === 'messages') {
             align-items: flex-start;
             justify-content: space-between;
             gap: 20px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .message-person {
             display: flex;
             align-items: center;
-            gap: 13px;
+            gap: 12px;
             min-width: 0;
         }
 
         .message-avatar {
             display: grid;
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             flex: 0 0 auto;
             place-items: center;
-            background: var(--lime);
+            background: var(--primary);
             border-radius: 50%;
-            font-size: 0.82rem;
-            font-weight: 700;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            font-weight: 800;
         }
 
         .message-person h2 {
-            margin: 0 0 3px;
-            font-size: 0.98rem;
-            font-weight: 600;
-            letter-spacing: -0.02em;
+            margin: 0 0 2px;
+            font-size: 0.92rem;
+            font-weight: 700;
         }
 
         .message-person a {
             display: block;
             overflow: hidden;
             color: var(--muted);
-            font-size: 0.8rem;
+            font-size: 0.77rem;
             text-overflow: ellipsis;
             text-decoration: none;
             white-space: nowrap;
         }
 
         .message-person a:hover {
-            color: var(--ink);
+            color: var(--primary);
         }
 
         .message-head time {
             flex: 0 0 auto;
             color: var(--muted);
-            font-size: 0.74rem;
+            font-size: 0.7rem;
             white-space: nowrap;
         }
 
         .message-body {
             margin: 0;
-            color: #4e5047;
-            font-size: 0.94rem;
+            color: #4a4c5a;
+            font-size: 0.9rem;
             line-height: 1.75;
         }
 
         .empty-state {
-            padding: 72px 24px;
-            background: var(--surface);
-            border: 1px dashed #c9c4b7;
+            padding: 68px 25px;
+            background: #fff;
+            border: 1px dashed #cfc7e5;
             border-radius: 24px;
             text-align: center;
         }
 
         .empty-icon {
             display: grid;
-            width: 58px;
-            height: 58px;
-            margin: 0 auto 18px;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 17px;
             place-items: center;
-            background: var(--lime);
+            background: var(--secondary);
             border-radius: 18px;
-            font-size: 1.4rem;
+            color: var(--primary);
+            font-size: 1.45rem;
         }
 
         .empty-state h2 {
-            margin: 0 0 8px;
-            font-size: 1.25rem;
-            font-weight: 600;
+            margin: 0 0 7px;
+            font-size: 1.2rem;
+            font-weight: 800;
             letter-spacing: -0.03em;
         }
 
         .empty-state p {
+            max-width: 370px;
             margin: 0 auto 20px;
-            max-width: 380px;
             color: var(--muted);
-            font-size: 0.9rem;
+            font-size: 0.86rem;
             line-height: 1.7;
         }
 
         @media (max-width: 991.98px) {
-            .hero {
-                padding-top: 60px;
+            body {
+                padding-top: 72px;
             }
 
-            .hero-panel {
-                min-height: 380px;
+            section {
+                scroll-margin-top: 72px;
+            }
+
+            .site-navbar,
+            .site-navbar .container {
+                min-height: 72px;
+            }
+
+            .navbar-collapse {
+                min-height: 0;
+                padding: 10px 0 18px;
+            }
+
+            .nav-side {
+                align-items: flex-start;
+                flex: none;
+                width: 100%;
+            }
+
+            .nav-end {
+                justify-content: flex-start;
+            }
+
+            .site-navbar .nav-link {
+                padding: 8px 0 !important;
+            }
+
+            .site-navbar .inbox-link {
+                margin-top: 7px;
+                margin-left: 0;
+                padding: 9px 15px !important;
+            }
+
+            .hero {
+                padding: 58px 0 50px;
+            }
+
+            .hero-art {
+                margin: 10px auto 0;
             }
 
             .section {
                 padding: 72px 0;
             }
 
-            .contact-wrap {
-                padding: 34px;
+            .contact-info {
+                margin-top: 22px;
             }
         }
 
-        @media (max-width: 767.98px) {
-            .navbar-collapse {
-                padding-top: 14px;
+        @media (max-width: 575.98px) {
+            .hero-name {
+                font-size: clamp(3.05rem, 15vw, 4.4rem);
             }
 
-            .navbar-nav {
-                align-items: flex-start !important;
-                gap: 2px;
+            .hero-copy {
+                font-size: 0.95rem;
             }
 
-            .nav-inbox {
-                margin-top: 8px;
+            .hero-art {
+                max-width: 350px;
             }
 
-            .hero {
-                padding: 48px 0 44px;
-            }
-
-            .hero-title {
-                font-size: clamp(2.8rem, 15vw, 4.2rem);
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
-
-            .stat {
-                padding: 16px 0;
-                border-right: 0;
-                border-bottom: 1px solid var(--line);
-            }
-
-            .stat:first-child {
-                padding-top: 0;
-            }
-
-            .stat:last-child {
-                padding-bottom: 0;
-                border-bottom: 0;
-            }
-
-            .contact-wrap {
-                padding: 28px 20px;
-                border-radius: 24px;
-            }
-
-            .form-panel {
+            .hero-card {
+                width: 90%;
                 padding: 20px;
             }
 
-            .footer-row {
-                align-items: flex-start;
-                flex-direction: column;
+            .float-pill {
+                padding: 8px 11px;
+                font-size: 0.68rem;
+            }
+
+            .float-pill.one {
+                right: 0;
+            }
+
+            .float-pill.two {
+                left: 0;
+            }
+
+            .section-title {
+                font-size: clamp(2.1rem, 10vw, 2.75rem);
+            }
+
+            .grade-number {
+                font-size: 4.7rem;
+            }
+
+            .student-top {
+                padding: 26px;
+            }
+
+            .student-body {
+                padding: 8px 22px 14px;
+            }
+
+            .learning-card,
+            .form-card {
+                padding: 22px;
+            }
+
+            .project-media {
+                height: 235px;
             }
 
             .inbox-title {
-                font-size: clamp(2.6rem, 13vw, 4rem);
+                font-size: clamp(2.7rem, 13vw, 3.6rem);
             }
 
             .inbox-summary {
@@ -1087,34 +1618,38 @@ if ($page === 'messages') {
 
             .message-head {
                 flex-direction: column;
-                gap: 9px;
+                gap: 8px;
+            }
+
+            .footer-row {
+                align-items: flex-start;
+                flex-direction: column;
             }
         }
     </style>
 </head>
-<body>
-    <header class="site-nav">
+<body <?= $page === 'messages' ? '' : 'data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-root-margin="0px 0px -70%" data-bs-smooth-scroll="true" tabindex="0"' ?>>
+    <nav class="navbar navbar-expand-lg fixed-top site-navbar" id="mainNav">
         <div class="container">
-            <nav class="navbar navbar-expand-md p-0">
-                <a class="brand" href="index.php">
-                    <span class="brand-mark">A</span>
-                    <span>Abdulmejid</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <i class="bi bi-list"></i>
-                </button>
-                <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.php#about">About</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.php#work">Work</a></li>
-                        <li class="nav-item"><a class="nav-link" href="index.php#contact">Contact</a></li>
-                        <li class="nav-item"><a class="nav-link nav-inbox <?= $page === 'messages' ? 'active' : '' ?>" href="index.php?page=messages"><i class="bi bi-inbox me-1"></i>Inbox</a></li>
-                    </ul>
-                </div>
-            </nav>
+            <a class="mobile-brand d-lg-none" href="index.php">A<span>.</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav nav-side">
+                    <li class="nav-item"><a class="nav-link <?= $page === 'home' ? 'active' : '' ?>" href="index.php#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#skills">Skills</a></li>
+                </ul>
+                <a class="brand-center d-none d-lg-grid" href="index.php#home" aria-label="Abdulmejid home">A</a>
+                <ul class="navbar-nav nav-side nav-end">
+                    <li class="nav-item"><a class="nav-link" href="index.php#projects">Projects</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php#contact">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link inbox-link <?= $page === 'messages' ? 'active' : '' ?>" href="index.php?page=messages"><i class="bi bi-inbox me-1"></i>Inbox</a></li>
+                </ul>
+            </div>
         </div>
-    </header>
+    </nav>
 
     <?php if ($page === 'messages'): ?>
         <main>
@@ -1122,110 +1657,98 @@ if ($page === 'messages') {
                 <div class="container">
                     <div class="row align-items-end g-4">
                         <div class="col-lg-7">
-                            <div class="eyebrow">Private inbox</div>
-                            <h1 class="inbox-title">Every hello,<br><em>in one place.</em></h1>
-                            <p class="inbox-subtitle">Messages sent from the portfolio contact form appear here. This page is connected to the same local database.</p>
+                            <div class="section-tag">Private inbox</div>
+                            <h1 class="inbox-title">Every hello,<br>one place.</h1>
+                            <p class="inbox-subtitle">Messages sent from the portfolio contact form are saved here. This page reads directly from the same local database.</p>
                         </div>
                         <div class="col-lg-5">
                             <div class="inbox-summary">
                                 <div class="summary-card">
-                                    <span>Total messages</span>
-                                    <strong><?= $messageCount ?></strong>
+                                    <span>Messages</span>
+                                    <strong class="count"><?= $messageCount ?></strong>
                                 </div>
                                 <div class="summary-card">
                                     <span>Latest hello</span>
                                     <strong><?= e($latestMessage) ?></strong>
                                 </div>
                             </div>
-                            <a class="btn-quiet" href="index.php"><i class="bi bi-arrow-left"></i>Back to portfolio</a>
+                            <a class="btn-ghost" href="index.php"><i class="bi bi-arrow-left"></i>Back to portfolio</a>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="container">
-                <?php if ($messageCount === 0): ?>
-                    <div class="empty-state">
-                        <div class="empty-icon"><i class="bi bi-envelope-open"></i></div>
-                        <h2>No messages yet</h2>
-                        <p>When someone sends a hi from the portfolio, their message will show up here.</p>
-                        <a class="btn-ink" href="index.php#contact">Send the first hi <i class="bi bi-arrow-up-right"></i></a>
-                    </div>
-                <?php else: ?>
-                    <div class="message-list">
-                        <?php foreach ($messages as $item): ?>
-                            <article class="message-card">
-                                <div class="message-head">
-                                    <div class="message-person">
-                                        <span class="message-avatar"><?= e(initials($item['name'])) ?></span>
-                                        <div>
-                                            <h2><?= e($item['name']) ?></h2>
-                                            <a href="mailto:<?= e($item['email']) ?>"><?= e($item['email']) ?></a>
+            <section class="section pt-4">
+                <div class="container">
+                    <?php if ($messageCount === 0): ?>
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="bi bi-envelope-open"></i></div>
+                            <h2>No messages yet</h2>
+                            <p>When someone sends a hi from the portfolio, their message will appear right here.</p>
+                            <a class="btn-brand" href="index.php#contact">Send the first hi <i class="bi bi-arrow-up-right"></i></a>
+                        </div>
+                    <?php else: ?>
+                        <div class="message-list">
+                            <?php foreach ($messages as $item): ?>
+                                <article class="message-card">
+                                    <div class="message-head">
+                                        <div class="message-person">
+                                            <span class="message-avatar"><?= e(initials($item['name'])) ?></span>
+                                            <div>
+                                                <h2><?= e($item['name']) ?></h2>
+                                                <a href="mailto:<?= e($item['email']) ?>"><?= e($item['email']) ?></a>
+                                            </div>
                                         </div>
+                                        <time datetime="<?= e($item['created_at']) ?>"><?= e(prettyDate($item['created_at'])) ?></time>
                                     </div>
-                                    <time datetime="<?= e($item['created_at']) ?>"><?= e(prettyDate($item['created_at'])) ?></time>
-                                </div>
-                                <p class="message-body"><?= nl2br(e($item['message'])) ?></p>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
+                                    <p class="message-body"><?= nl2br(e($item['message'])) ?></p>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </section>
         </main>
     <?php else: ?>
         <main>
-            <section class="hero">
+            <section class="hero" id="home">
                 <div class="container">
                     <div class="row align-items-center g-5">
                         <div class="col-lg-7">
-                            <div class="eyebrow">Grade 12 student &middot; 2026</div>
-                            <h1 class="hero-title">Curious mind.<br>Clean code.<br><em>Real projects.</em></h1>
-                            <p class="hero-copy">I am Abdulmejid, a grade 12 student learning how to turn ideas into simple, useful websites. I enjoy clean design, solving small problems, and getting a little better with every project.</p>
+                            <p class="hero-greeting">I'm</p>
+                            <h1 class="hero-name">Abdulmejid.</h1>
+                            <div class="typed-line"><span id="typedText">Cybersecurity Student</span><span class="typed-cursor"></span></div>
+                            <p class="hero-copy">A grade 12 student at Kings School with a growing focus on cybersecurity. I build small Python security projects and learn how clean front-end code, PHP, and databases work together.</p>
                             <div class="hero-actions">
-                                <a class="btn-ink" href="#contact">Send a hi <i class="bi bi-arrow-up-right"></i></a>
-                                <a class="btn-quiet" href="#work">View my work</a>
+                                <a class="btn-brand" href="#projects">View my projects <i class="bi bi-arrow-down-right"></i></a>
+                                <a class="btn-ghost" href="#contact">Send a hi</a>
+                            </div>
+                            <div class="hero-facts">
+                                <span><i class="bi bi-shield-check"></i>Cybersecurity focus</span>
+                                <span><i class="bi bi-mortarboard"></i>Kings School</span>
+                                <span><i class="bi bi-braces"></i>Python learner</span>
                             </div>
                         </div>
                         <div class="col-lg-5">
-                            <div class="hero-panel">
-                                <div class="panel-top">
-                                    <span>Student portfolio</span>
-                                    <span>2026</span>
-                                </div>
-                                <div class="status-row">
-                                    <div class="avatar">A</div>
-                                    <div>
-                                        <h2>Abdulmejid</h2>
-                                        <p>Learner &middot; Builder &middot; Student</p>
+                            <div class="hero-art">
+                                <div class="hero-orbit"></div>
+                                <div class="hero-blob"></div>
+                                <div class="hero-card">
+                                    <div class="hero-card-top">
+                                        <span class="window-dots"><i></i><i></i><i></i></span>
+                                        <span>abdulmejid@kings:~</span>
+                                    </div>
+                                    <div class="security-mark"><i class="bi bi-shield-lock-fill"></i></div>
+                                    <p class="security-label"><strong>Security minded</strong><span>Learning today, protecting tomorrow.</span></p>
+                                    <div class="terminal-stack">
+                                        <div><span>grade</span><strong>12</strong></div>
+                                        <div><span>school</span><strong>Kings School</strong></div>
+                                        <div><span>focus</span><strong>cybersecurity</strong></div>
                                     </div>
                                 </div>
-                                <div class="panel-rule"></div>
-                                <div class="mini-info">
-                                    <span>HTML &amp; CSS</span>
-                                    <span>PHP</span>
-                                    <span>UI design</span>
-                                </div>
-                                <p class="status-note"><span class="status-dot"></span>Open to learning and small projects</p>
+                                <div class="float-pill one"><i class="bi bi-braces"></i>Python</div>
+                                <div class="float-pill two"><i class="bi bi-code-slash"></i>Frontend</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="stats">
-                <div class="container">
-                    <div class="stats-grid">
-                        <div class="stat">
-                            <strong>12</strong>
-                            <span>Grade level</span>
-                        </div>
-                        <div class="stat">
-                            <strong>03</strong>
-                            <span>Projects built</span>
-                        </div>
-                        <div class="stat">
-                            <strong>2026</strong>
-                            <span>Graduation year</span>
                         </div>
                     </div>
                 </div>
@@ -1233,64 +1756,103 @@ if ($page === 'messages') {
 
             <section class="section" id="about">
                 <div class="container">
-                    <div class="row g-5">
+                    <div class="row align-items-center g-5">
                         <div class="col-lg-6">
-                            <div class="section-kicker"><span>01</span>About me</div>
-                            <h2 class="section-title">A student who likes<br><em>making things work.</em></h2>
-                            <p class="body-copy">My favorite part of web development is the moment a page finally feels right: the layout is clear, the buttons work, and someone can use it without asking questions. I am still learning, and that is the part I enjoy most.</p>
+                            <div class="section-tag">About me</div>
+                            <h2 class="section-title">A young learner,<br><span class="title-mark">security minded.</span></h2>
+                            <p class="body-copy">I am Abdulmejid, a grade 12 student at Kings School. My main interest is cybersecurity, and I like understanding how systems work, how they can fail, and how to protect them. I am also strengthening my front-end skills and learning PHP with MySQL.</p>
+                            <div class="check-list">
+                                <div><i class="bi bi-patch-check-fill"></i>Grade 12 student at Kings School</div>
+                                <div><i class="bi bi-patch-check-fill"></i>Cybersecurity is my main focus</div>
+                                <div><i class="bi bi-patch-check-fill"></i>Building Python security projects</div>
+                            </div>
+                            <a class="btn-brand" href="#contact">Let's connect <i class="bi bi-arrow-up-right"></i></a>
                         </div>
-                        <div class="col-lg-5 offset-lg-1">
-                            <div class="about-card">
-                                <ul class="about-list">
-                                    <li><span>School</span><strong>Grade 12</strong></li>
-                                    <li><span>Focus</span><strong>Web development</strong></li>
-                                    <li><span>Tools</span><strong>HTML, CSS, PHP</strong></li>
-                                    <li><span>Currently</span><strong>Building my portfolio</strong></li>
-                                    <li><span>Goal</span><strong>Keep learning by doing</strong></li>
-                                </ul>
+                        <div class="col-lg-6">
+                            <div class="student-card">
+                                <div class="student-top">
+                                    <span class="student-badge">Student profile</span>
+                                    <div class="grade-row">
+                                        <div class="grade-number">12</div>
+                                        <div>
+                                            <h3>Kings School</h3>
+                                            <p>Cybersecurity focus</p>
+                                        </div>
+                                    </div>
+                                    <div class="student-status"><i class="bi bi-circle-fill"></i>Grade 12 · Class of 2026</div>
+                                </div>
+                                <div class="student-body">
+                                    <div class="student-row"><span>Name</span><strong>Abdulmejid</strong></div>
+                                    <div class="student-row"><span>School</span><strong>Kings School</strong></div>
+                                    <div class="student-row"><span>Focus</span><strong>Cybersecurity</strong></div>
+                                    <div class="student-row"><span>Learning</span><strong>Frontend, PHP &amp; MySQL</strong></div>
+                                    <div class="student-row"><span>Projects</span><strong>2 Python builds</strong></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section class="section pt-0">
+            <section class="section section-light" id="skills">
                 <div class="container">
-                    <div class="section-kicker"><span>02</span>What I am learning</div>
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="skill-card">
-                                <div class="skill-icon"><i class="bi bi-code-slash"></i></div>
-                                <h3>Front-end basics</h3>
-                                <p>Building responsive pages with clean HTML, modern CSS, and Bootstrap components.</p>
-                                <div class="tag-row">
-                                    <span class="tag">HTML</span>
-                                    <span class="tag">CSS</span>
-                                    <span class="tag">Bootstrap</span>
-                                </div>
+                    <div class="row g-5 align-items-start">
+                        <div class="col-lg-6">
+                            <div class="section-tag">What I'm learning</div>
+                            <h2 class="section-title">Building a strong<br><span class="title-mark">technical base.</span></h2>
+                            <p class="body-copy mb-5">I am improving my front-end skills and learning how to connect PHP to MySQL databases. Python is where I practice cybersecurity ideas by building small, useful tools.</p>
+                            <div class="skill-item">
+                                <div class="skill-head"><h6>Advanced frontend</h6><span>85%</span></div>
+                                <div class="progress" role="progressbar" aria-label="Advanced frontend" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bar-primary" style="width: 85%"></div></div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-head"><h6>PHP &amp; MySQL</h6><span>75%</span></div>
+                                <div class="progress" role="progressbar" aria-label="PHP and MySQL" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bar-yellow" style="width: 75%"></div></div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-head"><h6>Python for security</h6><span>80%</span></div>
+                                <div class="progress" role="progressbar" aria-label="Python for security" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bar-dark" style="width: 80%"></div></div>
+                            </div>
+                            <div class="skill-item">
+                                <div class="skill-head"><h6>Cybersecurity fundamentals</h6><span>70%</span></div>
+                                <div class="progress" role="progressbar" aria-label="Cybersecurity fundamentals" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar bar-mid" style="width: 70%"></div></div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="skill-card">
-                                <div class="skill-icon"><i class="bi bi-server"></i></div>
-                                <h3>PHP &amp; data</h3>
-                                <p>Connecting forms to a database, saving information, and showing it back in a clear way.</p>
-                                <div class="tag-row">
-                                    <span class="tag">PHP</span>
-                                    <span class="tag">SQLite</span>
-                                    <span class="tag">Forms</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="skill-card">
-                                <div class="skill-icon"><i class="bi bi-pen"></i></div>
-                                <h3>Simple design</h3>
-                                <p>Using spacing, type, and color to make a page feel calm, readable, and easy to use.</p>
-                                <div class="tag-row">
-                                    <span class="tag">UI design</span>
-                                    <span class="tag">Layout</span>
-                                    <span class="tag">Details</span>
+                        <div class="col-lg-6">
+                            <div class="learning-card">
+                                <ul class="nav nav-pills focus-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation"><button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#education" role="tab" aria-selected="true">Education</button></li>
+                                    <li class="nav-item" role="presentation"><button class="nav-link" type="button" data-bs-toggle="pill" data-bs-target="#focus" role="tab" aria-selected="false">Current focus</button></li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="education" role="tabpanel">
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                                            <div><h6>Grade 12 Student</h6><p>Studying at Kings School with a clear interest in technology and cybersecurity.</p><small>Kings School · 2025 to 2026</small></div>
+                                        </div>
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-shield-check"></i></div>
+                                            <div><h6>Cybersecurity Focus</h6><p>Learning core security ideas through self-study and practical Python projects.</p><small>Independent learning</small></div>
+                                        </div>
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-award-fill"></i></div>
+                                            <div><h6>Class of 2026</h6><p>Preparing for the next step while continuing to build real project experience.</p><small>Graduation year</small></div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="focus" role="tabpanel">
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-window-stack"></i></div>
+                                            <div><h6>Advanced frontend</h6><p>Responsive layouts, Bootstrap, accessible forms, and cleaner interface design.</p><small>HTML · CSS · Bootstrap</small></div>
+                                        </div>
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-database-fill"></i></div>
+                                            <div><h6>PHP &amp; MySQL</h6><p>Connecting forms to databases, storing data safely, and displaying useful results.</p><small>Server-side development</small></div>
+                                        </div>
+                                        <div class="focus-row">
+                                            <div class="focus-icon"><i class="bi bi-terminal-fill"></i></div>
+                                            <div><h6>Python security tools</h6><p>Practising detection, monitoring, and reporting with small Python applications.</p><small>Python · Security</small></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1298,58 +1860,53 @@ if ($page === 'messages') {
                 </div>
             </section>
 
-            <section class="section pt-0" id="work">
+            <section class="section" id="projects">
                 <div class="container">
                     <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
                         <div>
-                            <div class="section-kicker"><span>03</span>Selected work</div>
-                            <h2 class="section-title mb-0">Small projects,<br><em>real practice.</em></h2>
+                            <div class="section-tag">Selected projects</div>
+                            <h2 class="section-title mb-0">Two Python projects.<br><span class="title-mark">One clear goal.</span></h2>
                         </div>
-                        <a class="btn-quiet" href="#contact">Ask me about them <i class="bi bi-arrow-right"></i></a>
+                        <a class="btn-ghost" href="#contact">Ask me about them <i class="bi bi-arrow-right"></i></a>
                     </div>
-                    <div class="row g-4">
-                        <div class="col-md-4">
+                    <div class="row g-4 mt-2">
+                        <div class="col-lg-6">
                             <article class="project-card">
-                                <div class="project-top">
-                                    <span class="project-number">PROJECT 01</span>
-                                    <span class="project-arrow"><i class="bi bi-arrow-up-right"></i></span>
+                                <div class="project-media edr">
+                                    <span class="project-label">Python · Security</span>
+                                    <span class="project-status">In progress</span>
+                                    <div class="project-icon"><i class="bi bi-shield-exclamation"></i></div>
+                                    <div class="project-code"><span></span><span></span><span></span></div>
                                 </div>
-                                <h3>Study Planner</h3>
-                                <p>A simple weekly planner for keeping track of homework, tests, and study time without the clutter.</p>
-                                <div class="tag-row">
-                                    <span class="tag">HTML</span>
-                                    <span class="tag">CSS</span>
-                                    <span class="tag">JavaScript</span>
+                                <div class="project-body">
+                                    <h3>EDR System</h3>
+                                    <p>A Python-based endpoint detection and response project that watches system activity, highlights suspicious behaviour, and gives the user a simple alert view.</p>
+                                    <div class="tag-row">
+                                        <span class="tag">Python</span>
+                                        <span class="tag">Threat detection</span>
+                                        <span class="tag">Monitoring</span>
+                                    </div>
+                                    <div class="project-footer"><span><i class="bi bi-cpu me-1"></i>Endpoint security</span><span>Grade 12 project</span></div>
                                 </div>
                             </article>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-lg-6">
                             <article class="project-card">
-                                <div class="project-top">
-                                    <span class="project-number">PROJECT 02</span>
-                                    <span class="project-arrow"><i class="bi bi-arrow-up-right"></i></span>
+                                <div class="project-media tool">
+                                    <span class="project-label">Python · Tool</span>
+                                    <span class="project-status">In progress</span>
+                                    <div class="project-icon"><i class="bi bi-terminal"></i></div>
+                                    <div class="project-code"><span></span><span></span><span></span></div>
                                 </div>
-                                <h3>Class Library</h3>
-                                <p>A small book catalog where students can browse titles and see which books are available.</p>
-                                <div class="tag-row">
-                                    <span class="tag">PHP</span>
-                                    <span class="tag">SQLite</span>
-                                    <span class="tag">Bootstrap</span>
-                                </div>
-                            </article>
-                        </div>
-                        <div class="col-md-4">
-                            <article class="project-card">
-                                <div class="project-top">
-                                    <span class="project-number">PROJECT 03</span>
-                                    <span class="project-arrow"><i class="bi bi-arrow-up-right"></i></span>
-                                </div>
-                                <h3>Weather Dashboard</h3>
-                                <p>A clean weather page that turns a public API response into a quick, readable forecast.</p>
-                                <div class="tag-row">
-                                    <span class="tag">API</span>
-                                    <span class="tag">JavaScript</span>
-                                    <span class="tag">UI</span>
+                                <div class="project-body">
+                                    <h3>Cybersecurity Software</h3>
+                                    <p>A Python security tool designed to check common risks, scan files, and produce clear reports that are easy to understand and act on.</p>
+                                    <div class="tag-row">
+                                        <span class="tag">Python</span>
+                                        <span class="tag">File scanning</span>
+                                        <span class="tag">Reporting</span>
+                                    </div>
+                                    <div class="project-footer"><span><i class="bi bi-bug me-1"></i>Security utility</span><span>Grade 12 project</span></div>
                                 </div>
                             </article>
                         </div>
@@ -1357,49 +1914,69 @@ if ($page === 'messages') {
                 </div>
             </section>
 
-            <section class="section pt-0" id="contact">
+            <section class="section section-light" id="contact">
                 <div class="container">
-                    <div class="contact-wrap">
-                        <div class="row g-5 align-items-center">
-                            <div class="col-lg-5">
-                                <div class="section-kicker"><span>04</span>Say hello</div>
-                                <h2 class="section-title">Send me a hi.</h2>
-                                <p class="contact-copy">Have a question, a project idea, or just want to say hello? Leave a short message. It will be saved in the inbox page.</p>
-                                <div class="contact-links">
-                                    <a href="mailto:hello@example.com"><i class="bi bi-envelope"></i>hello@example.com</a>
-                                    <a href="index.php?page=messages"><i class="bi bi-inbox"></i>View the inbox</a>
+                    <div class="row g-5">
+                        <div class="col-lg-5">
+                            <div class="section-tag">Contact</div>
+                            <h2 class="section-title">Let's work<br><span class="title-mark">together.</span></h2>
+                            <p class="body-copy">Have a question, a project idea, or just want to say hello? Send a short message and it will be saved in the inbox.</p>
+                            <div class="contact-info">
+                                <div class="contact-row">
+                                    <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+                                    <div><span>Email</span><strong>hello@example.com</strong></div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                                    <div><span>School</span><strong>Kings School</strong></div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                                    <div><span>Focus</span><strong>Cybersecurity</strong></div>
+                                </div>
+                                <div class="contact-row">
+                                    <div class="contact-icon"><i class="bi bi-inbox-fill"></i></div>
+                                    <div><span>Message inbox</span><strong><a href="index.php?page=messages">View sent messages</a></strong></div>
                                 </div>
                             </div>
-                            <div class="col-lg-7">
-                                <div class="form-panel">
-                                    <?php if ($error !== ''): ?>
-                                        <div class="form-alert error"><i class="bi bi-exclamation-circle me-1"></i><?= e($error) ?></div>
-                                    <?php endif; ?>
-                                    <?php if ($flash !== ''): ?>
-                                        <div class="form-alert success"><i class="bi bi-check-circle me-1"></i><?= e($flash) ?></div>
-                                    <?php endif; ?>
-                                    <form method="post" action="index.php#contact">
-                                        <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
-                                        <div class="row g-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label" for="name">Your name</label>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="form-card">
+                                <h3>Send a hi</h3>
+                                <p>Keep it short. Your message goes straight to the local inbox.</p>
+                                <?php if ($error !== ''): ?>
+                                    <div class="form-alert error"><i class="bi bi-exclamation-circle me-1"></i><?= e($error) ?></div>
+                                <?php endif; ?>
+                                <?php if ($flash !== ''): ?>
+                                    <div class="form-alert success"><i class="bi bi-check-circle me-1"></i><?= e($flash) ?></div>
+                                <?php endif; ?>
+                                <form method="post" action="index.php#contact">
+                                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
                                                 <input class="form-control" type="text" id="name" name="name" value="<?= e($name) ?>" placeholder="Your name" maxlength="80" required>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label" for="email">Email</label>
-                                                <input class="form-control" type="email" id="email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" maxlength="120" required>
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label" for="message">Your message</label>
-                                                <textarea class="form-control" id="message" name="message" placeholder="Say hi, ask a question, or share an idea..." maxlength="1000" required><?= e($message) ?></textarea>
-                                            </div>
-                                            <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-3">
-                                                <button class="btn-send" type="submit">Send hi <i class="bi bi-arrow-up-right"></i></button>
-                                                <p class="form-note mb-0">Stored locally. No spam, ever.</p>
+                                                <label for="name">Your name</label>
                                             </div>
                                         </div>
-                                    </form>
-                                </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input class="form-control" type="email" id="email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" maxlength="120" required>
+                                                <label for="email">Your email</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <textarea class="form-control" id="message" name="message" placeholder="Write your message" maxlength="1000" required><?= e($message) ?></textarea>
+                                                <label for="message">Your message</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                            <button class="btn-send" type="submit">Send message <i class="bi bi-arrow-up-right"></i></button>
+                                            <span class="small text-muted">Stored locally. No spam.</span>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -1411,17 +1988,52 @@ if ($page === 'messages') {
     <footer class="site-footer">
         <div class="container">
             <div class="footer-row">
-                <span>&copy; <?= date('Y') ?> Abdulmejid &middot; Grade 12 portfolio</span>
+                <span>&copy; <?= date('Y') ?> Abdulmejid. Built as a grade 12 portfolio.</span>
                 <div class="footer-links">
-                    <a href="index.php">Home</a>
-                    <a href="index.php#work">Work</a>
+                    <a href="index.php#home">Home</a>
+                    <a href="index.php#projects">Projects</a>
                     <a href="index.php#contact">Contact</a>
                     <a href="index.php?page=messages">Inbox</a>
+                    <span class="footer-credit">Template inspiration: <a href="https://freewebsitecreate.net" target="_blank" rel="noreferrer">Free Website Create</a></span>
                 </div>
             </div>
         </div>
     </footer>
 
+    <a class="back-top" id="backTop" href="<?= $page === 'messages' ? 'index.php' : '#home' ?>" aria-label="Back to top"><i class="bi bi-arrow-up"></i></a>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const typedText = document.getElementById("typedText");
+        if (typedText) {
+            const phrases = ["Cybersecurity Student", "Python Learner", "Frontend Developer", "Grade 12 Student"];
+            let phraseIndex = 0;
+            let charIndex = 0;
+            let removing = false;
+            const type = () => {
+                const word = phrases[phraseIndex];
+                charIndex += removing ? -1 : 1;
+                typedText.textContent = word.slice(0, charIndex);
+                let delay = removing ? 50 : 95;
+                if (!removing && charIndex === word.length) {
+                    removing = true;
+                    delay = 1600;
+                } else if (removing && charIndex === 0) {
+                    removing = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    delay = 320;
+                }
+                window.setTimeout(type, delay);
+            };
+            type();
+        }
+
+        const backTop = document.getElementById("backTop");
+        const syncBackTop = () => {
+            backTop.classList.toggle("show", window.scrollY > 420);
+        };
+        window.addEventListener("scroll", syncBackTop);
+        syncBackTop();
+    </script>
 </body>
 </html>
