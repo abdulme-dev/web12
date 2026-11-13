@@ -96,14 +96,15 @@ if ($page === 'messages') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #6244c5;
-            --primary-dark: #4c329e;
-            --primary-soft: #eee9ff;
-            --secondary: #ffe720;
-            --light: #fafafb;
-            --dark: #12141d;
-            --muted: #686a7c;
-            --border: #e7e4ef;
+            --primary: #1b1c18;
+            --primary-dark: #30322b;
+            --primary-soft: #ebe8dd;
+            --secondary: #c9f16f;
+            --light: #f5f3ec;
+            --surface: #fffdf8;
+            --dark: #1b1c18;
+            --muted: #73756a;
+            --border: #e2ded1;
         }
 
         * {
@@ -122,7 +123,7 @@ if ($page === 'messages') {
             margin: 0;
             padding-top: 84px;
             overflow-x: hidden;
-            background: #fff;
+            background: var(--surface);
             color: var(--dark);
             font-family: "Open Sans", sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -148,9 +149,9 @@ if ($page === 'messages') {
         .site-navbar {
             min-height: 84px;
             padding: 0;
-            background: rgba(255, 255, 255, 0.96);
-            border-bottom: 1px solid rgba(231, 228, 239, 0.8);
-            box-shadow: 0 8px 30px rgba(18, 20, 29, 0.06);
+            background: rgba(255, 253, 248, 0.96);
+            border-bottom: 1px solid rgba(226, 222, 209, 0.84);
+            box-shadow: 0 8px 30px rgba(27, 28, 24, 0.05);
             backdrop-filter: blur(16px);
         }
 
@@ -202,6 +203,7 @@ if ($page === 'messages') {
 
         .site-navbar .nav-link:hover,
         .site-navbar .nav-link.active {
+            background: var(--primary-soft);
             color: var(--primary);
         }
 
@@ -225,7 +227,7 @@ if ($page === 'messages') {
             place-items: center;
             background: var(--secondary);
             border-radius: 18px;
-            box-shadow: 0 8px 20px rgba(255, 231, 32, 0.32);
+            box-shadow: 0 8px 20px rgba(201, 241, 111, 0.34);
             color: var(--primary);
             font-size: 1.9rem;
             font-weight: 800;
@@ -252,7 +254,7 @@ if ($page === 'messages') {
             right: -180px;
             width: 680px;
             height: 680px;
-            background: radial-gradient(circle, rgba(98, 68, 197, 0.16), transparent 68%);
+            background: radial-gradient(circle, rgba(201, 241, 111, 0.24), transparent 68%);
             border-radius: 50%;
             content: "";
         }
@@ -263,7 +265,7 @@ if ($page === 'messages') {
             left: -70px;
             width: 170px;
             height: 170px;
-            background: radial-gradient(circle, rgba(255, 231, 32, 0.44), transparent 70%);
+            background: radial-gradient(circle, rgba(27, 28, 24, 0.1), transparent 70%);
             border-radius: 50%;
             content: "";
         }
@@ -406,7 +408,7 @@ if ($page === 'messages') {
         .hero-orbit {
             position: absolute;
             inset: 8%;
-            border: 1px dashed rgba(98, 68, 197, 0.34);
+            border: 1px dashed rgba(27, 28, 24, 0.18);
             border-radius: 50%;
             animation: orbit 30s linear infinite;
         }
@@ -418,9 +420,9 @@ if ($page === 'messages') {
             width: 14px;
             height: 14px;
             background: var(--secondary);
-            border: 4px solid #fff;
+            border: 4px solid var(--surface);
             border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(18, 20, 29, 0.14);
+            box-shadow: 0 4px 12px rgba(27, 28, 24, 0.12);
             content: "";
         }
 
@@ -435,7 +437,7 @@ if ($page === 'messages') {
             inset: 13% 5% 4% 12%;
             background: var(--primary);
             border-radius: 45% 55% 60% 40% / 50% 45% 55% 50%;
-            opacity: 0.12;
+            opacity: 0.06;
             transform: rotate(-10deg);
         }
 
@@ -445,10 +447,10 @@ if ($page === 'messages') {
             width: 88%;
             overflow: hidden;
             padding: 24px;
-            background: linear-gradient(145deg, #1a1c27, #12141d);
+            background: linear-gradient(145deg, #1e1f1a, #131410);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 28px;
-            box-shadow: 0 30px 70px rgba(18, 20, 29, 0.28);
+            box-shadow: 0 30px 70px rgba(27, 28, 24, 0.24);
             color: #fff;
         }
 
@@ -467,7 +469,7 @@ if ($page === 'messages') {
             right: -80px;
             width: 240px;
             height: 240px;
-            background: radial-gradient(circle, rgba(98, 68, 197, 0.6), transparent 68%);
+            background: radial-gradient(circle, rgba(201, 241, 111, 0.18), transparent 68%);
             content: "";
             pointer-events: none;
         }
@@ -509,11 +511,11 @@ if ($page === 'messages') {
             height: 104px;
             margin: 2px auto 20px;
             place-items: center;
-            background: linear-gradient(135deg, var(--primary), #8d72e8);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: var(--secondary);
+            border: 1px solid rgba(27, 28, 24, 0.06);
             border-radius: 30px;
-            box-shadow: 0 0 0 12px rgba(98, 68, 197, 0.12);
-            color: var(--secondary);
+            box-shadow: 0 0 0 12px rgba(201, 241, 111, 0.1);
+            color: var(--dark);
             font-size: 3rem;
         }
 
@@ -571,10 +573,10 @@ if ($page === 'messages') {
             align-items: center;
             gap: 8px;
             padding: 10px 13px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 999px;
-            box-shadow: 0 12px 30px rgba(18, 20, 29, 0.12);
+            box-shadow: 0 12px 30px rgba(27, 28, 24, 0.1);
             font-size: 0.76rem;
             font-weight: 700;
         }
@@ -677,17 +679,17 @@ if ($page === 'messages') {
 
         .student-card {
             overflow: hidden;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 28px;
-            box-shadow: 0 20px 55px rgba(18, 20, 29, 0.08);
+            box-shadow: 0 20px 55px rgba(27, 28, 24, 0.06);
         }
 
         .student-top {
             position: relative;
             overflow: hidden;
             padding: 32px;
-            background: linear-gradient(145deg, var(--primary), #5436ad);
+            background: linear-gradient(145deg, #1e1f1a, #2d2f27);
             color: #fff;
         }
 
@@ -843,7 +845,7 @@ if ($page === 'messages') {
         .progress {
             height: 7px;
             overflow: hidden;
-            background: #eae7f3;
+            background: #e6e2d6;
             border-radius: 999px;
         }
 
@@ -864,15 +866,15 @@ if ($page === 'messages') {
         }
 
         .bar-mid {
-            background: #9b86e2;
+            background: #a8c96a;
         }
 
         .learning-card {
             padding: 28px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 28px;
-            box-shadow: 0 18px 45px rgba(18, 20, 29, 0.06);
+            box-shadow: 0 18px 45px rgba(27, 28, 24, 0.05);
         }
 
         .focus-tabs {
@@ -951,15 +953,15 @@ if ($page === 'messages') {
         .project-card {
             height: 100%;
             overflow: hidden;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 26px;
-            box-shadow: 0 14px 38px rgba(18, 20, 29, 0.055);
+            box-shadow: 0 14px 38px rgba(27, 28, 24, 0.045);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .project-card:hover {
-            box-shadow: 0 22px 50px rgba(18, 20, 29, 0.11);
+            box-shadow: 0 22px 50px rgba(27, 28, 24, 0.09);
             transform: translateY(-5px);
         }
 
@@ -978,11 +980,11 @@ if ($page === 'messages') {
         }
 
         .project-media.edr {
-            background: radial-gradient(circle at 28% 22%, #49328f, transparent 52%), var(--dark);
+            background: radial-gradient(circle at 28% 22%, #3c3f32, transparent 52%), var(--dark);
         }
 
         .project-media.tool {
-            background: radial-gradient(circle at 82% 20%, #8f77df, transparent 52%), linear-gradient(145deg, var(--primary), #4a3196);
+            background: radial-gradient(circle at 82% 20%, rgba(201, 241, 111, 0.78), transparent 55%), #eae6da;
         }
 
         .project-label,
@@ -1030,8 +1032,27 @@ if ($page === 'messages') {
         }
 
         .project-media.tool .project-icon {
-            background: #fff;
-            color: var(--primary);
+            background: var(--dark);
+            color: var(--secondary);
+        }
+
+        .project-media.tool .project-label {
+            background: rgba(27, 28, 24, 0.07);
+            border-color: rgba(27, 28, 24, 0.12);
+            color: rgba(27, 28, 24, 0.66);
+        }
+
+        .project-media.tool .project-status {
+            background: var(--dark);
+            color: var(--secondary);
+        }
+
+        .project-media.tool .project-code {
+            color: rgba(27, 28, 24, 0.36);
+        }
+
+        .project-media.tool .project-code span {
+            background: rgba(27, 28, 24, 0.16);
         }
 
         .project-card:hover .project-icon {
@@ -1162,10 +1183,10 @@ if ($page === 'messages') {
 
         .form-card {
             padding: 30px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 26px;
-            box-shadow: 0 20px 55px rgba(18, 20, 29, 0.08);
+            box-shadow: 0 20px 55px rgba(27, 28, 24, 0.06);
         }
 
         .form-card h3 {
@@ -1200,9 +1221,9 @@ if ($page === 'messages') {
         }
 
         .form-control:focus {
-            background: #fff;
+            background: var(--surface);
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(98, 68, 197, 0.11);
+            box-shadow: 0 0 0 4px rgba(27, 28, 24, 0.08);
         }
 
         .btn-send {
@@ -1233,9 +1254,9 @@ if ($page === 'messages') {
         }
 
         .form-alert.success {
-            background: #fffbe0;
-            border: 1px solid #f1e58a;
-            color: #685c00;
+            background: #f2f8e3;
+            border: 1px solid #d4e7ad;
+            color: #49630f;
         }
 
         .site-footer {
@@ -1283,7 +1304,7 @@ if ($page === 'messages') {
             place-items: center;
             background: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 10px 24px rgba(98, 68, 197, 0.32);
+            box-shadow: 0 10px 24px rgba(27, 28, 24, 0.24);
             color: #fff;
             font-size: 1rem;
             opacity: 0;
@@ -1317,7 +1338,7 @@ if ($page === 'messages') {
             right: -100px;
             width: 430px;
             height: 430px;
-            background: radial-gradient(circle, rgba(98, 68, 197, 0.15), transparent 68%);
+            background: radial-gradient(circle, rgba(201, 241, 111, 0.22), transparent 68%);
             border-radius: 50%;
             content: "";
         }
@@ -1352,10 +1373,10 @@ if ($page === 'messages') {
 
         .summary-card {
             padding: 20px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 18px;
-            box-shadow: 0 10px 28px rgba(18, 20, 29, 0.05);
+            box-shadow: 0 10px 28px rgba(27, 28, 24, 0.04);
         }
 
         .summary-card span {
@@ -1388,14 +1409,14 @@ if ($page === 'messages') {
 
         .message-card {
             padding: 23px;
-            background: #fff;
+            background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 19px;
             transition: border-color 0.2s ease, transform 0.2s ease;
         }
 
         .message-card:hover {
-            border-color: #cfc5ef;
+            border-color: #cdc8b8;
             transform: translateY(-2px);
         }
 
@@ -1463,8 +1484,8 @@ if ($page === 'messages') {
 
         .empty-state {
             padding: 68px 25px;
-            background: #fff;
-            border: 1px dashed #cfc7e5;
+            background: var(--surface);
+            border: 1px dashed #c9c4b7;
             border-radius: 24px;
             text-align: center;
         }
