@@ -1945,7 +1945,7 @@ if ($page === 'messages') {
                             <div class="contact-info">
                                 <div class="contact-row">
                                     <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
-                                    <div><span>Email</span><strong>hello@example.com</strong></div>
+                                    <div><span>Email</span><strong>abdulme838@gmail.com</strong></div>
                                 </div>
                                 <div class="contact-row">
                                     <div class="contact-icon"><i class="bi bi-mortarboard-fill"></i></div>
@@ -2015,7 +2015,6 @@ if ($page === 'messages') {
                     <a href="index.php#projects">Projects</a>
                     <a href="index.php#contact">Contact</a>
                     <a href="index.php?page=messages">Inbox</a>
-                    <span class="footer-credit">Template inspiration: <a href="https://freewebsitecreate.net" target="_blank" rel="noreferrer">Free Website Create</a></span>
                 </div>
             </div>
         </div>
