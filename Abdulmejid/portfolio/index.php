@@ -1,4 +1,10 @@
 <?php
+ini_set('session.use_strict_mode', '1');
+session_set_cookie_params([
+    'httponly' => true,
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Lax',
+]);
 session_start();
 
 $dbHost = getenv('PORTFOLIO_DB_HOST') ?: '127.0.0.1';
@@ -62,28 +68,73 @@ function prettyDate($value) {
 }
 
 $page = $_GET['page'] ?? 'home';
+if (!in_array($page, ['home', 'login', 'messages'], true)) {
+    $page = 'home';
+}
+
 $error = '';
 $name = '';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $message = trim($_POST['message'] ?? '');
+    $form = $_POST['form'] ?? '';
     $csrf = $_POST['csrf'] ?? '';
 
-    if (!hash_equals($_SESSION['csrf'], $csrf)) {
+    if (!is_string($form) || !is_string($csrf) || !hash_equals($_SESSION['csrf'], $csrf)) {
         $error = 'Your session expired. Please try again.';
-    } elseif ($name === '' || $message === '') {
-        $error = 'Please enter your name and a message.';
-    } elseif (strlen($name) > 80 || strlen($message) > 1000) {
-        $error = 'Please keep your name under 80 characters and your message under 1,000 characters.';
-    } else {
-        $statement = $db->prepare('INSERT INTO messages (name, message) VALUES (?, ?)');
-        $statement->execute([$name, $message]);
-        $_SESSION['flash'] = 'Your hi has been sent. Thank you for reaching out.';
-        header('Location: index.php?sent=1#contact');
+    } elseif ($form === 'owner_login' && $page === 'login') {
+        $password = $_POST['password'] ?? '';
+        $passwordHash = getenv('PORTFOLIO_OWNER_PASSWORD_HASH');
+
+        if (!is_string($password) || $password === '') {
+            $error = 'Please enter your owner password.';
+        } elseif ($passwordHash === false || $passwordHash === '') {
+            $error = 'Owner sign-in is not configured. Set PORTFOLIO_OWNER_PASSWORD_HASH and restart the site.';
+        } elseif (password_verify($password, $passwordHash)) {
+            session_regenerate_id(true);
+            $_SESSION['owner_authenticated'] = true;
+            $_SESSION['csrf'] = bin2hex(random_bytes(32));
+            header('Location: index.php?page=messages');
+            exit;
+        } else {
+            $error = 'That password did not match. Please try again.';
+        }
+    } elseif ($form === 'owner_logout' && $page === 'messages' && !empty($_SESSION['owner_authenticated'])) {
+        unset($_SESSION['owner_authenticated']);
+        session_regenerate_id(true);
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
+        header('Location: index.php');
         exit;
+    } elseif ($form === 'message' && $page === 'home') {
+        $nameInput = $_POST['name'] ?? '';
+        $messageInput = $_POST['message'] ?? '';
+        $name = is_string($nameInput) ? trim($nameInput) : '';
+        $message = is_string($messageInput) ? trim($messageInput) : '';
+
+        if ($name === '' || $message === '') {
+            $error = 'Please enter your name and a message.';
+        } elseif (strlen($name) > 80 || strlen($message) > 1000) {
+            $error = 'Please keep your name under 80 characters and your message under 1,000 characters.';
+        } else {
+            $statement = $db->prepare('INSERT INTO messages (name, message) VALUES (?, ?)');
+            $statement->execute([$name, $message]);
+            $_SESSION['flash'] = 'Your hi has been sent. Thank you for reaching out.';
+            header('Location: index.php?sent=1#contact');
+            exit;
+        }
+    } else {
+        $error = 'That request could not be completed. Please try again.';
     }
+}
+
+$ownerAuthenticated = !empty($_SESSION['owner_authenticated']);
+if ($page === 'messages' && !$ownerAuthenticated) {
+    header('Location: index.php?page=login');
+    exit;
+}
+if ($page === 'login' && $ownerAuthenticated) {
+    header('Location: index.php?page=messages');
+    exit;
 }
 
 $flash = $_SESSION['flash'] ?? '';
@@ -109,7 +160,7 @@ if ($page === 'messages') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Abdulmejid is a grade 12 student at Kings School focused on cybersecurity, Python, and web development.">
-    <title><?= $page === 'messages' ? 'Inbox' : 'Abdulmejid' ?> | Student Portfolio</title>
+    <title><?= $page === 'messages' ? 'Inbox' : ($page === 'login' ? 'Owner sign in' : 'Abdulmejid') ?> | Student Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1687,13 +1738,40 @@ if ($page === 'messages') {
                 <ul class="navbar-nav nav-side nav-end">
                     <li class="nav-item"><a class="nav-link" href="index.php#projects">Projects</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php#contact">Contact</a></li>
-                    <li class="nav-item"><a class="nav-link inbox-link <?= $page === 'messages' ? 'active' : '' ?>" href="index.php?page=messages"><i class="bi bi-inbox me-1"></i>Inbox</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <?php if ($page === 'messages'): ?>
+    <?php if ($page === 'login'): ?>
+        <main>
+            <section class="section">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 col-lg-6">
+                            <div class="form-card">
+                                <div class="section-tag">Owner access</div>
+                                <h1 class="section-title">Private inbox</h1>
+                                <p>Sign in with the owner password to read submitted messages.</p>
+                                <?php if ($error !== ''): ?>
+                                    <div class="form-alert error" role="alert"><i class="bi bi-exclamation-circle me-1"></i><?= e($error) ?></div>
+                                <?php endif; ?>
+                                <form method="post" action="index.php?page=login">
+                                    <input type="hidden" name="form" value="owner_login">
+                                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
+                                    <div class="form-floating mb-3">
+                                        <input class="form-control" type="password" id="password" name="password" placeholder="Owner password" autocomplete="current-password" maxlength="4096" required>
+                                        <label for="password">Owner password</label>
+                                    </div>
+                                    <button class="btn-send" type="submit">Sign in <i class="bi bi-arrow-right"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    <?php elseif ($page === 'messages'): ?>
         <main>
             <section class="inbox-hero">
                 <div class="container">
@@ -1714,7 +1792,14 @@ if ($page === 'messages') {
                                     <strong><?= e($latestMessage) ?></strong>
                                 </div>
                             </div>
-                            <a class="btn-ghost" href="index.php"><i class="bi bi-arrow-left"></i>Back to portfolio</a>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn-ghost" href="index.php"><i class="bi bi-arrow-left"></i>Back to portfolio</a>
+                                <form method="post" action="index.php?page=messages">
+                                    <input type="hidden" name="form" value="owner_logout">
+                                    <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
+                                    <button class="btn-ghost" type="submit">Sign out</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1972,10 +2057,6 @@ if ($page === 'messages') {
                                     <div class="contact-icon"><i class="bi bi-shield-lock-fill"></i></div>
                                     <div><span>Focus</span><strong>Cybersecurity</strong></div>
                                 </div>
-                                <div class="contact-row">
-                                    <div class="contact-icon"><i class="bi bi-inbox-fill"></i></div>
-                                    <div><span>Message inbox</span><strong><a href="index.php?page=messages">View sent messages</a></strong></div>
-                                </div>
                             </div>
                         </div>
                         <div class="col-lg-7">
@@ -1989,6 +2070,7 @@ if ($page === 'messages') {
                                     <div class="form-alert success"><i class="bi bi-check-circle me-1"></i><?= e($flash) ?></div>
                                 <?php endif; ?>
                                 <form method="post" action="index.php#contact">
+                                    <input type="hidden" name="form" value="message">
                                     <input type="hidden" name="csrf" value="<?= e($_SESSION['csrf']) ?>">
                                     <div class="row g-3">
                                         <div class="col-md-6">
@@ -2025,14 +2107,14 @@ if ($page === 'messages') {
                     <a href="index.php#home">Home</a>
                     <a href="index.php#projects">Projects</a>
                     <a href="index.php#contact">Contact</a>
-                    <a href="index.php?page=messages">Inbox</a>
+                    <a href="index.php?page=login">Owner sign in</a>
                     <span class="footer-credit">Template inspiration: <a href="https://freewebsitecreate.net" target="_blank" rel="noreferrer">Free Website Create</a></span>
                 </div>
             </div>
         </div>
     </footer>
 
-    <a class="back-top" id="backTop" href="<?= $page === 'messages' ? 'index.php' : '#home' ?>" aria-label="Back to top"><i class="bi bi-arrow-up"></i></a>
+    <a class="back-top" id="backTop" href="<?= in_array($page, ['messages', 'login'], true) ? 'index.php' : '#home' ?>" aria-label="Back to top"><i class="bi bi-arrow-up"></i></a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
