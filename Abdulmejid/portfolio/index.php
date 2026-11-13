@@ -1,19 +1,42 @@
 <?php
 session_start();
 
+$dbHost = getenv('PORTFOLIO_DB_HOST') ?: '127.0.0.1';
+$dbPort = getenv('PORTFOLIO_DB_PORT') ?: '3306';
+$dbName = getenv('PORTFOLIO_DB_NAME') ?: 'abdulmejid_portfolio';
+$dbUser = getenv('PORTFOLIO_DB_USER');
+$dbPassword = getenv('PORTFOLIO_DB_PASSWORD');
+
+if ($dbUser === false || $dbPassword === false) {
+    http_response_code(500);
+    exit('Set the MySQL username and password in the environment before starting the site.');
+}
+
+if (!preg_match('/\A[A-Za-z0-9_]+\z/', $dbName) || filter_var($dbPort, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 65535]]) === false) {
+    http_response_code(500);
+    exit('The database settings are invalid. Check the database name and port.');
+}
+
 try {
-    $db = new PDO('sqlite:' . __DIR__ . '/portfolio.sqlite');
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
+    $serverDsn = "mysql:host={$dbHost};port={$dbPort};charset=utf8mb4";
+    $server = new PDO($serverDsn, $dbUser, $dbPassword, $options);
+    $server->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    $db = new PDO($serverDsn . ";dbname={$dbName}", $dbUser, $dbPassword, $options);
     $db->exec('CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        message TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        message VARCHAR(1000) NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
     )');
 } catch (PDOException $exception) {
+    error_log($exception->getMessage());
     http_response_code(500);
-    exit('The database could not be opened. Please make sure the portfolio folder is writable.');
+    exit('The database is not ready. Check your MySQL settings and make sure the database user can create databases.');
 }
 
 if (empty($_SESSION['csrf'])) {
@@ -41,26 +64,22 @@ function prettyDate($value) {
 $page = $_GET['page'] ?? 'home';
 $error = '';
 $name = '';
-$email = '';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
     $message = trim($_POST['message'] ?? '');
     $csrf = $_POST['csrf'] ?? '';
 
     if (!hash_equals($_SESSION['csrf'], $csrf)) {
         $error = 'Your session expired. Please try again.';
-    } elseif ($name === '' || $email === '' || $message === '') {
-        $error = 'Please fill in all three fields.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
-    } elseif (strlen($name) > 80 || strlen($email) > 120 || strlen($message) > 1000) {
-        $error = 'Please keep your name and email short and your message under 1,000 characters.';
+    } elseif ($name === '' || $message === '') {
+        $error = 'Please enter your name and a message.';
+    } elseif (strlen($name) > 80 || strlen($message) > 1000) {
+        $error = 'Please keep your name under 80 characters and your message under 1,000 characters.';
     } else {
-        $statement = $db->prepare('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)');
-        $statement->execute([$name, $email, $message]);
+        $statement = $db->prepare('INSERT INTO messages (name, message) VALUES (?, ?)');
+        $statement->execute([$name, $message]);
         $_SESSION['flash'] = 'Your hi has been sent. Thank you for reaching out.';
         header('Location: index.php?sent=1#contact');
         exit;
@@ -75,7 +94,9 @@ $messageCount = 0;
 $latestMessage = 'No messages yet';
 
 if ($page === 'messages') {
-    $messages = $db->query('SELECT * FROM messages ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC);
+    $statement = $db->prepare('SELECT id, name, message, created_at FROM messages ORDER BY id DESC');
+    $statement->execute();
+    $messages = $statement->fetchAll();
     $messageCount = count($messages);
     if ($messageCount > 0) {
         $latestMessage = prettyDate($messages[0]['created_at']);
@@ -101,9 +122,9 @@ if ($page === 'messages') {
             --primary-soft: #ebe8dd;
             --secondary: #c9f16f;
             --light: #f5f3ec;
-            --surface: #fffdf8;
+            --canvas: #ffffff;
             --dark: #1b1c18;
-            --muted: #73756a;
+            --subtle: #73756a;
             --border: #e2ded1;
         }
 
@@ -123,7 +144,7 @@ if ($page === 'messages') {
             margin: 0;
             padding-top: 84px;
             overflow-x: hidden;
-            background: var(--surface);
+            background: var(--canvas);
             color: var(--dark);
             font-family: "Open Sans", sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -1717,7 +1738,7 @@ if ($page === 'messages') {
                                             <span class="message-avatar"><?= e(initials($item['name'])) ?></span>
                                             <div>
                                                 <h2><?= e($item['name']) ?></h2>
-                                                <a href="mailto:<?= e($item['email']) ?>"><?= e($item['email']) ?></a>
+                                                <span>Sent a hello</span>
                                             </div>
                                         </div>
                                         <time datetime="<?= e($item['created_at']) ?>"><?= e(prettyDate($item['created_at'])) ?></time>
@@ -1944,10 +1965,6 @@ if ($page === 'messages') {
                             <p class="body-copy">Have a question, a project idea, or just want to say hello? Send a short message and it will be saved in the inbox.</p>
                             <div class="contact-info">
                                 <div class="contact-row">
-                                    <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
-                                    <div><span>Email</span><strong>hello@example.com</strong></div>
-                                </div>
-                                <div class="contact-row">
                                     <div class="contact-icon"><i class="bi bi-mortarboard-fill"></i></div>
                                     <div><span>School</span><strong>Kings School</strong></div>
                                 </div>
@@ -1978,12 +1995,6 @@ if ($page === 'messages') {
                                             <div class="form-floating">
                                                 <input class="form-control" type="text" id="name" name="name" value="<?= e($name) ?>" placeholder="Your name" maxlength="80" required>
                                                 <label for="name">Your name</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input class="form-control" type="email" id="email" name="email" value="<?= e($email) ?>" placeholder="you@example.com" maxlength="120" required>
-                                                <label for="email">Your email</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
