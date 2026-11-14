@@ -74,10 +74,165 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         redirect('index.php#contact');
     }
+
+    if ($action === 'setup_owner') {
+        $username = trim((string) ($_POST['username'] ?? ''));
+        $password = (string) ($_POST['password'] ?? '');
+        $confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+        if ($dbError !== null) {
+            set_flash('danger', $dbError);
+            redirect('index.php?view=messages');
+        }
+
+        if (!csrf_ok()) {
+            set_flash('danger', 'Your session expired. Please try again.');
+            redirect('index.php?view=messages');
+        }
+
+        $errors = [];
+
+        if (!preg_match('/^[A-Za-z0-9_.-]{3,30}$/', $username)) {
+            $errors[] = 'Choose a username with 3 to 30 letters, numbers, dots, dashes, or underscores.';
+        }
+
+        if (mb_strlen($password) < 8) {
+            $errors[] = 'Use a password with at least 8 characters.';
+        }
+
+        if ($password !== $confirmPassword) {
+            $errors[] = 'The passwords do not match.';
+        }
+
+        if ($errors) {
+            set_flash('danger', implode(' ', $errors));
+            redirect('index.php?view=messages');
+        }
+
+        if (owner_count($pdo) > 0) {
+            set_flash('danger', 'An owner account already exists. Please sign in.');
+            redirect('index.php?view=messages');
+        }
+
+        try {
+            $stmt = $pdo->prepare('INSERT INTO owners (username, password_hash) VALUES (?, ?)');
+            $stmt->execute([$username, password_hash($password, PASSWORD_DEFAULT)]);
+            session_regenerate_id(true);
+            $_SESSION['owner_id'] = (int) $pdo->lastInsertId();
+            $_SESSION['owner_username'] = $username;
+            unset($_SESSION['csrf']);
+            set_flash('success', 'Owner account created. You are now signed in.');
+        } catch (Throwable $exception) {
+            error_log('Owner setup error: ' . $exception->getMessage());
+            set_flash('danger', 'The owner account could not be created. Please try again.');
+        }
+
+        redirect('index.php?view=messages');
+    }
+
+    if ($action === 'login') {
+        $username = trim((string) ($_POST['username'] ?? ''));
+        $password = (string) ($_POST['password'] ?? '');
+
+        if ($dbError !== null) {
+            set_flash('danger', $dbError);
+            redirect('index.php?view=messages');
+        }
+
+        if (!csrf_ok()) {
+            set_flash('danger', 'Your session expired. Please try again.');
+            redirect('index.php?view=messages');
+        }
+
+        $stmt = $pdo->prepare('SELECT id, username, password_hash FROM owners WHERE username = ? LIMIT 1');
+        $stmt->execute([$username]);
+        $account = $stmt->fetch();
+
+        if ($account && password_verify($password, $account['password_hash'])) {
+            session_regenerate_id(true);
+            $_SESSION['owner_id'] = (int) $account['id'];
+            $_SESSION['owner_username'] = $account['username'];
+            unset($_SESSION['csrf']);
+            set_flash('success', 'Welcome back, ' . $account['username'] . '.');
+            redirect('index.php?view=messages');
+        }
+
+        usleep(400000);
+        set_flash('danger', 'Those details did not match an owner account.');
+        redirect('index.php?view=messages');
+    }
+
+    if ($action === 'logout') {
+        if (!csrf_ok()) {
+            set_flash('danger', 'Your session expired. Please try again.');
+            redirect('index.php?view=messages');
+        }
+
+        unset($_SESSION['owner_id'], $_SESSION['owner_username']);
+        session_regenerate_id(true);
+        set_flash('success', 'You have been signed out.');
+        redirect('index.php');
+    }
+
+    if ($action === 'delete_message') {
+        $owner = current_owner();
+
+        if (!$owner) {
+            http_response_code(403);
+            exit('Access denied.');
+        }
+
+        if ($dbError !== null) {
+            set_flash('danger', $dbError);
+            redirect('index.php?view=messages');
+        }
+
+        if (!csrf_ok()) {
+            set_flash('danger', 'Your session expired. Please try again.');
+            redirect('index.php?view=messages');
+        }
+
+        $id = (int) ($_POST['id'] ?? 0);
+
+        if ($id > 0) {
+            $stmt = $pdo->prepare('DELETE FROM messages WHERE id = ?');
+            $stmt->execute([$id]);
+            set_flash($stmt->rowCount() > 0 ? 'success' : 'warning', $stmt->rowCount() > 0 ? 'Message deleted.' : 'That message was already gone.');
+        }
+
+        redirect('index.php?view=messages');
+    }
+}
+
+$view = ($_GET['view'] ?? '') === 'messages' ? 'messages' : 'home';
+$owner = current_owner();
+$messages = [];
+$totalMessages = 0;
+$latestMessageAt = null;
+$authMode = null;
+
+if ($view === 'messages' && $dbError === null) {
+    if (!$owner) {
+        $authMode = owner_count($pdo) === 0 ? 'setup' : 'login';
+    } else {
+        try {
+            $stmt = $pdo->query('SELECT id, name, email, message, created_at FROM messages ORDER BY created_at DESC, id DESC LIMIT 100');
+            $messages = $stmt->fetchAll();
+            $totalMessages = (int) $pdo->query('SELECT COUNT(*) FROM messages')->fetchColumn();
+            $latestMessageAt = $messages[0]['created_at'] ?? null;
+        } catch (Throwable $exception) {
+            error_log('Inbox query error: ' . $exception->getMessage());
+            $dbError = 'The inbox could not be loaded. Please try again later.';
+        }
+    }
+}
+
+if ($view === 'messages') {
+    header('Cache-Control: no-store, private');
 }
 
 $flash = get_flash();
-$contactState = get_contact_state();
+$contactState = $view === 'home' ? get_contact_state() : ['errors' => [], 'old' => []];
 $old = $contactState['old'];
 $errors = $contactState['errors'];
 ?>
@@ -86,7 +241,10 @@ $errors = $contactState['errors'];
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Samson Desalign | Grade 12 Web Developer</title>
+    <title><?= $view === 'messages' ? 'Owner Inbox | Samson Desalign' : 'Samson Desalign | Grade 12 Web Developer' ?></title>
+    <?php if ($view === 'messages'): ?>
+        <meta name="robots" content="noindex, nofollow">
+    <?php endif; ?>
     <meta name="description" content="The personal portfolio of Samson Desalign, a Grade 12 student at Kings learning web development with HTML, CSS, PHP and MySQL.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,7 +263,7 @@ $errors = $contactState['errors'];
             --canvas: #f5f4ef;
             --card: #ffffff;
             --text: #182430;
-            --text-soft: #5d6b7a;
+            --subtle: #5d6b7a;
             --border: #e2e5e6;
             --corner: 22px;
         }
@@ -529,7 +687,7 @@ $errors = $contactState['errors'];
 
         .lead-copy {
             font-size: 1.1rem;
-            color: var(--text-soft);
+            color: var(--subtle);
             max-width: 62ch;
         }
 
@@ -546,7 +704,7 @@ $errors = $contactState['errors'];
             font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.14em;
-            color: var(--text-soft);
+            color: var(--subtle);
             font-weight: 600;
             margin-bottom: 0.25rem;
         }
@@ -598,7 +756,7 @@ $errors = $contactState['errors'];
 
         .panel-intro {
             font-size: 0.9rem;
-            color: var(--text-soft);
+            color: var(--subtle);
             margin-bottom: 0.5rem;
         }
 
@@ -615,7 +773,7 @@ $errors = $contactState['errors'];
         }
 
         .skill-head span:last-child {
-            color: var(--text-soft);
+            color: var(--subtle);
             font-weight: 500;
         }
 
@@ -682,7 +840,7 @@ $errors = $contactState['errors'];
         .learning-list span {
             display: block;
             font-size: 0.84rem;
-            color: var(--text-soft);
+            color: var(--subtle);
             margin-top: 0.15rem;
         }
 
@@ -832,7 +990,7 @@ $errors = $contactState['errors'];
         }
 
         .project-body p {
-            color: var(--text-soft);
+            color: var(--subtle);
             font-size: 0.9rem;
             margin-bottom: 1rem;
         }
@@ -843,7 +1001,7 @@ $errors = $contactState['errors'];
             gap: 0.45rem;
             font-size: 0.76rem;
             font-weight: 600;
-            color: var(--text-soft);
+            color: var(--subtle);
         }
 
         .project-status i {
@@ -963,7 +1121,7 @@ $errors = $contactState['errors'];
 
         .form-note {
             font-size: 0.75rem;
-            color: var(--text-soft);
+            color: var(--subtle);
             margin-top: 0.85rem;
             margin-bottom: 0;
         }
@@ -987,6 +1145,214 @@ $errors = $contactState['errors'];
 
         .site-footer a:hover {
             color: var(--gold);
+        }
+
+        .inbox-page {
+            background: var(--canvas);
+        }
+
+        .inbox-nav {
+            background: rgba(245, 244, 239, 0.94);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(16, 42, 67, 0.08);
+            padding: 1rem 0;
+        }
+
+        .inbox-main {
+            padding: 4rem 0 5rem;
+            min-height: calc(100vh - 150px);
+        }
+
+        .inbox-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .inbox-stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+        }
+
+        .stat-card span {
+            display: block;
+            font-size: 0.66rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--subtle);
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-card strong {
+            font-family: "Sora", sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .auth-wrap {
+            max-width: 480px;
+            margin: 2.5rem auto;
+        }
+
+        .auth-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--corner);
+            padding: 2.2rem;
+            box-shadow: 0 20px 50px rgba(16, 42, 67, 0.08);
+        }
+
+        .auth-mark {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: var(--navy);
+            color: #ffffff;
+            display: grid;
+            place-items: center;
+            font-family: "Sora", sans-serif;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+        }
+
+        .auth-card h1 {
+            font-size: 1.7rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-card > p {
+            font-size: 0.9rem;
+            color: var(--subtle);
+        }
+
+        .message-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .message-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .message-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--teal-soft);
+            color: var(--teal-dark);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .message-who {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-who h2 {
+            font-size: 1rem;
+            margin: 0 0 0.1rem;
+        }
+
+        .message-who a {
+            font-size: 0.8rem;
+            color: var(--subtle);
+            overflow-wrap: anywhere;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: var(--subtle);
+            white-space: nowrap;
+            padding-top: 0.2rem;
+        }
+
+        .message-text {
+            margin: 1rem 0 0;
+            font-size: 0.92rem;
+            color: var(--text);
+            line-height: 1.75;
+            overflow-wrap: anywhere;
+        }
+
+        .message-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .inbox-empty {
+            text-align: center;
+            padding: 4rem 1.5rem;
+            background: var(--card);
+            border: 1px dashed #cfd6d4;
+            border-radius: var(--corner);
+        }
+
+        .inbox-empty i {
+            font-size: 2.2rem;
+            color: var(--teal);
+        }
+
+        .inbox-empty h2 {
+            font-size: 1.3rem;
+            margin: 1rem 0 0.4rem;
+        }
+
+        .inbox-empty p {
+            color: var(--subtle);
+            font-size: 0.88rem;
+            margin-bottom: 0;
+        }
+
+        .inbox-note {
+            font-size: 0.75rem;
+            color: var(--subtle);
+        }
+
+        .btn-outline-dark {
+            border-radius: 999px;
+        }
+
+        .btn-outline-danger {
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 767.98px) {
+            .inbox-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .message-head {
+                flex-wrap: wrap;
+            }
+
+            .message-time {
+                width: 100%;
+                padding-left: 60px;
+                white-space: normal;
+            }
         }
 
         @media (max-width: 991.98px) {
@@ -1065,7 +1431,8 @@ $errors = $contactState['errors'];
         }
     </style>
 </head>
-<body>
+<body class="<?= $view === 'messages' ? 'inbox-page' : '' ?>">
+    <?php if ($view === 'home'): ?>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <nav class="navbar navbar-expand-lg sticky-top site-nav" aria-label="Main navigation">
@@ -1372,10 +1739,164 @@ $errors = $contactState['errors'];
             <span>&copy; <?= date('Y') ?> Samson Desalign. Built with PHP, MySQL, and Bootstrap.</span>
             <div class="d-flex gap-3">
                 <a href="#home">Back to top</a>
-                <a href="index.php">Home</a>
+                <a href="index.php?view=messages"><?= $owner ? 'Messages' : 'Owner sign in' ?></a>
             </div>
         </div>
     </footer>
+    <?php else: ?>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <nav class="inbox-nav" aria-label="Owner navigation">
+        <div class="container d-flex align-items-center justify-content-between gap-3">
+            <a class="navbar-brand" href="index.php">
+                <span class="brand-mark">SD</span>
+                <span>Samson<span class="brand-dot">.</span></span>
+            </a>
+            <a class="btn btn-outline-dark btn-sm px-3" href="index.php"><i class="bi bi-arrow-left me-1"></i> View site</a>
+        </div>
+    </nav>
+
+    <main class="inbox-main" id="main">
+        <div class="container">
+            <?php if ($dbError !== null): ?>
+                <div class="auth-wrap">
+                    <div class="auth-card">
+                        <div class="auth-mark">SD</div>
+                        <p class="section-kicker mb-2">Owner inbox</p>
+                        <h1>Inbox unavailable</h1>
+                        <p><?= e($dbError) ?></p>
+                        <a class="btn btn-brand w-100 mt-2" href="index.php">Back to the portfolio</a>
+                    </div>
+                </div>
+            <?php elseif (!$owner): ?>
+                <div class="auth-wrap">
+                    <?php if ($flash): ?>
+                        <div class="alert alert-<?= e($flash['type']) ?> mb-3" role="alert"><?= e($flash['text']) ?></div>
+                    <?php endif; ?>
+                    <div class="auth-card">
+                        <div class="auth-mark">SD</div>
+                        <?php if ($authMode === 'setup'): ?>
+                            <p class="section-kicker mb-2">First-time setup</p>
+                            <h1>Create the owner account</h1>
+                            <p>This setup appears only once. Choose a username and a password you will remember. Only this account can read the messages.</p>
+                            <form method="post" action="index.php" class="mt-4">
+                                <input type="hidden" name="action" value="setup_owner">
+                                <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                <div class="mb-3">
+                                    <label class="form-label" for="setup-username">Username</label>
+                                    <input class="form-control" type="text" id="setup-username" name="username" minlength="3" maxlength="30" autocomplete="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="setup-password">Password</label>
+                                    <input class="form-control" type="password" id="setup-password" name="password" minlength="8" maxlength="100" autocomplete="new-password" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="setup-confirm">Confirm password</label>
+                                    <input class="form-control" type="password" id="setup-confirm" name="confirm_password" minlength="8" maxlength="100" autocomplete="new-password" required>
+                                </div>
+                                <button class="btn btn-brand w-100" type="submit">Create owner account</button>
+                            </form>
+                            <p class="inbox-note mt-3 mb-0">Use at least 8 characters for the password.</p>
+                        <?php else: ?>
+                            <p class="section-kicker mb-2">Owner access</p>
+                            <h1>Welcome back</h1>
+                            <p>Sign in to read the private messages sent through the portfolio.</p>
+                            <form method="post" action="index.php" class="mt-4">
+                                <input type="hidden" name="action" value="login">
+                                <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                <div class="mb-3">
+                                    <label class="form-label" for="login-username">Username</label>
+                                    <input class="form-control" type="text" id="login-username" name="username" maxlength="30" autocomplete="username" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label" for="login-password">Password</label>
+                                    <input class="form-control" type="password" id="login-password" name="password" maxlength="100" autocomplete="current-password" required>
+                                </div>
+                                <button class="btn btn-brand w-100" type="submit">Sign in</button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                    <p class="inbox-note text-center mt-3 mb-0">Private area. Messages are never shown without signing in.</p>
+                </div>
+            <?php else: ?>
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+                    <div>
+                        <p class="section-kicker mb-2">Owner inbox</p>
+                        <h1 class="inbox-title">Messages</h1>
+                        <p class="text-secondary mb-0">Signed in as <strong><?= e($owner['username']) ?></strong>. Only you can see this page.</p>
+                    </div>
+                    <form method="post" action="index.php">
+                        <input type="hidden" name="action" value="logout">
+                        <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                        <button class="btn btn-outline-dark btn-sm px-3" type="submit"><i class="bi bi-box-arrow-right me-1"></i> Sign out</button>
+                    </form>
+                </div>
+
+                <?php if ($flash): ?>
+                    <div class="alert alert-<?= e($flash['type']) ?> mt-4 mb-0" role="alert"><?= e($flash['text']) ?></div>
+                <?php endif; ?>
+
+                <div class="inbox-stats">
+                    <div class="stat-card">
+                        <span>Total messages</span>
+                        <strong><?= $totalMessages ?></strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Latest message</span>
+                        <strong><?= $latestMessageAt ? e(date('M j', strtotime($latestMessageAt))) : 'None yet' ?></strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Access</span>
+                        <strong>Owner only</strong>
+                    </div>
+                </div>
+
+                <?php if (!$messages): ?>
+                    <div class="inbox-empty">
+                        <i class="bi bi-inbox"></i>
+                        <h2>No messages yet</h2>
+                        <p>When someone says hi through the portfolio, it will appear here.</p>
+                    </div>
+                <?php else: ?>
+                    <?php if ($totalMessages > count($messages)): ?>
+                        <p class="inbox-note">Showing the latest 100 of <?= $totalMessages ?> messages.</p>
+                    <?php endif; ?>
+                    <?php foreach ($messages as $message): ?>
+                        <?php
+                        $createdAt = strtotime($message['created_at']);
+                        $createdLabel = $createdAt ? date('M j, Y', $createdAt) . ' at ' . date('g:i A', $createdAt) : $message['created_at'];
+                        ?>
+                        <article class="message-card">
+                            <div class="message-head">
+                                <div class="message-avatar"><?= e(mb_strtoupper(mb_substr($message['name'], 0, 1))) ?></div>
+                                <div class="message-who">
+                                    <h2><?= e($message['name']) ?></h2>
+                                    <a href="mailto:<?= e($message['email']) ?>"><?= e($message['email']) ?></a>
+                                </div>
+                                <time class="message-time" datetime="<?= e($message['created_at']) ?>"><?= e($createdLabel) ?></time>
+                            </div>
+                            <p class="message-text"><?= nl2br(e($message['message'])) ?></p>
+                            <div class="message-actions">
+                                <form method="post" action="index.php" onsubmit="return confirm('Delete this message?');">
+                                    <input type="hidden" name="action" value="delete_message">
+                                    <input type="hidden" name="id" value="<?= (int) $message['id'] ?>">
+                                    <input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-trash3 me-1"></i> Delete</button>
+                                </form>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
+            <span>&copy; <?= date('Y') ?> Samson Desalign. Private owner area.</span>
+            <a href="index.php">Back to portfolio</a>
+        </div>
+    </footer>
+    <?php endif; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
