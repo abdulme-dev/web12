@@ -2058,6 +2058,13 @@ if ($page === 'messages') {
                             <p class="body-copy">Have a question, a project idea, or just want to say hello? Send a short message and it will be saved in the inbox.</p>
                             <div class="contact-info">
                                 <div class="contact-row">
+<<<<<<< HEAD
+=======
+                                    <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+                                    <div><span>Email</span><strong>abdulme838@gmail.com</strong></div>
+                                </div>
+                                <div class="contact-row">
+>>>>>>> c9aacbed2a4041783f5bb9d6ec250af1d041e491
                                     <div class="contact-icon"><i class="bi bi-mortarboard-fill"></i></div>
                                     <div><span>School</span><strong>Kings School</strong></div>
                                 </div>
@@ -2115,8 +2122,12 @@ if ($page === 'messages') {
                     <a href="index.php#home">Home</a>
                     <a href="index.php#projects">Projects</a>
                     <a href="index.php#contact">Contact</a>
+<<<<<<< HEAD
                     <a href="index.php?page=login">Owner sign in</a>
                     <span class="footer-credit">Template inspiration: <a href="https://github.com/dangi-tech/personal-portfolio-template2_Grade12" target="_blank" rel="noreferrer">Grade 12 Portfolio Template</a></span>
+=======
+                    <a href="index.php?page=messages">Inbox</a>
+>>>>>>> c9aacbed2a4041783f5bb9d6ec250af1d041e491
                 </div>
             </div>
         </div>
